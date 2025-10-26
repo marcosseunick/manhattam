@@ -66,8 +66,19 @@
       </section>
     </main>
 
-    <footer>
-      <small>© Savepoint Ludoteca</small>
-    </footer>
-  </body>
+  <footer>
+    <small>© Savepoint Ludoteca</small>
+  </footer>
+
+  <script>
+    // Verifica se já tem usuário logado
+    (function() {
+      const usuarioLogado = localStorage.getItem('usuarioLogado');
+      if (usuarioLogado) {
+        // Já tem cadastro, redireciona para o painel
+        window.location.href = 'painel_usuario.html';
+      }
+    })();
+  </script>
+</body>
 </html>

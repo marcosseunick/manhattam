@@ -135,10 +135,10 @@
       const checkbox = document.getElementById('acceptCheckbox');
       const declineBtn = document.getElementById('declineBtn');
 
-      // Se já aceitou antes -> redireciona
+      // Se já aceitou antes, marca o checkbox automaticamente
       if (accepts === 'true') {
-        // Redireciona para a página de cadastro
-        window.location.href = 'cadastro.html';
+        checkbox.checked = true;
+        continueBtn.disabled = false;
       }
 
       // Habilitar botão apenas se checkbox marcado
@@ -150,7 +150,9 @@
       continueBtn.addEventListener('click', () => {
         if (!checkbox.checked) return;
         localStorage.setItem(KEY, 'true');
-        // Redirecionamento após aceitar
+        
+        // Sempre redireciona para a página de cadastro
+        // O cadastro redirecionará para o painel após o cadastro ser concluído
         window.location.href = 'cadastro.html';
       });
 
