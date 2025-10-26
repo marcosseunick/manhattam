@@ -15,199 +15,138 @@
 
   <main>
     <section aria-label="Ferramentas do monitor">
-      <h2>Adicionar Jogadores à Mesa</h2>
-      
-      <!-- Opção 1: Inserir ID ou QR Code direto -->
       <article>
-        <h3>Opção 1: Inserir ID ou QR Code</h3>
-        <div>
-          <label for="qr-code-input">QR Code ou ID do Usuário</label>
-          <input id="qr-code-input" type="text" placeholder="Ex: ALU-412345-A3F8K2" />
-          <button type="button" id="btn-adicionar-qr">Adicionar</button>
-        </div>
+        <button type="button" id="start-session-btn">Iniciar sessão na mesa</button>
       </article>
 
-      <!-- Opção 2: Buscar usuário -->
-      <article>
-        <h3>Opção 2: Buscar Usuário</h3>
+      <!-- Scanner QR: usa câmera frontal (facingMode: user) e lista múltiplos códigos detectados -->
+      <section id="qr-scanner" aria-label="Scanner de QR" hidden>
+        <h3>Scanner de QR — Câmera Frontal</h3>
         <div>
-          <label for="buscar-nome">Nome do usuário</label>
-          <input id="buscar-nome" type="text" placeholder="Digite o nome..." />
-          <button type="button" id="btn-buscar">Buscar</button>
+          <video id="qr-video" autoplay playsinline style="max-width:100%;width:320px;height:auto;transform:scaleX(-1);"></video>
+          <canvas id="qr-canvas" hidden></canvas>
         </div>
-        <div id="resultados-busca"></div>
-      </article>
+        <div>
+          <button type="button" id="stop-scanner-btn">Parar scanner</button>
+        </div>
+        <div>
+          <h4>QR codes lidos</h4>
+          <ul id="scanned-list"></ul>
+        </div>
+        <small>Observação: em navegadores móveis é necessário HTTPS para acessar a câmera. Se a frontal não for suportada, o scanner tenta usar a traseira.</small>
+      </section>
 
-      <!-- Iniciar Sessão -->
+      <!-- Botão 'Escanear Carteirinha' removido conforme solicitado -->
+
       <article>
-        <button type="button" id="btn-iniciar-sessao">Iniciar Sessão de Jogo</button>
+        <div>
+          <label for="id-sala">Inserir ID da Sala</label>
+          <input id="id-sala" name="id-sala" type="text" />
+          <button type="button">Adicionar</button>
+        </div>
       </article>
     </section>
 
     <section aria-labelledby="sessao-atual">
-      <h2 id="sessao-atual">Jogadores na Mesa</h2>
-      <ul id="jogadores-na-mesa" style="list-style: none; padding: 0;">
-        <!-- Lista de jogadores aparecerá aqui -->
+      <h2 id="sessao-atual">Sessão Atual</h2>
+      <ul id="jogadores-na-mesa">
+        <!-- Lista de jogadores na mesa aparecerá aqui -->
       </ul>
     </section>
   </main>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+  <script>
+    // QR scanner: usa câmera frontal quando possível (facingMode: 'user'), com fallback para 'environment'.
+    (function () {
+      const startBtn = document.getElementById('start-session-btn');
+      const stopBtn = document.getElementById('stop-scanner-btn');
+      const scannerSection = document.getElementById('qr-scanner');
+      const video = document.getElementById('qr-video');
+      const canvasEl = document.getElementById('qr-canvas');
+      const canvas = canvasEl.getContext('2d');
+      const scannedList = document.getElementById('scanned-list');
+
+      let stream = null;
+      let scanning = false;
+      let rafId = null;
+      const scanned = new Set();
+
+      async function startScanner() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert('Navegador não suporta acesso à câmera.');
+          return;
+        }
+
+        try {
+          // Tenta abrir a câmera frontal (user). Se falhar, faz fallback para environment.
+          const constraints = { video: { facingMode: { ideal: 'user' }, width: { ideal: 1280 }, height: { ideal: 720 } } };
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (err) {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+          } catch (err2) {
+            console.error('Erro ao acessar câmera:', err, err2);
+            alert('Não foi possível acessar a câmera. Confira permissões e se o site está em HTTPS.');
+            return;
+          }
+        }
+
+        video.srcObject = stream;
+        video.setAttribute('playsinline', true); // para iOS
+        await video.play();
+
+        scanning = true;
+        scannerSection.hidden = false;
+        tick();
+      }
+
+      function stopScanner() {
+        scanning = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        if (stream) {
+          stream.getTracks().forEach(t => t.stop());
+          stream = null;
+        }
+        scannerSection.hidden = true;
+      }
+
+      function tick() {
+        if (!scanning) return;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          canvasEl.width = video.videoWidth;
+          canvasEl.height = video.videoHeight;
+          canvas.drawImage(video, 0, 0, canvasEl.width, canvasEl.height);
+          try {
+            const imageData = canvas.getImageData(0, 0, canvasEl.width, canvasEl.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'attemptBoth' });
+            if (code && code.data) {
+              const text = code.data.trim();
+              if (!scanned.has(text)) {
+                scanned.add(text);
+                const li = document.createElement('li');
+                li.textContent = text;
+                scannedList.appendChild(li);
+              }
+            }
+          } catch (e) {
+            // leitura pode falhar em alguns frames; ignoramos e continuamos
+            console.debug('jsQR erro/frame:', e);
+          }
+        }
+        rafId = requestAnimationFrame(tick);
+      }
+
+      startBtn.addEventListener('click', startScanner);
+      stopBtn.addEventListener('click', stopScanner);
+
+      // Expor funções úteis ao console para teste manual
+      window._qrScanner = { start: startScanner, stop: stopScanner, scanned };
+    })();
+  </script>
 
   <footer>
     <small>© Savepoint Ludoteca</small>
   </footer>
-
-  <script>
-    const API_BASE = 'http://localhost:3000/api';
-    const jogadoresNaMesa = [];
-    
-    // Adicionar por QR Code
-    document.getElementById('btn-adicionar-qr').addEventListener('click', async () => {
-      const qrCode = document.getElementById('qr-code-input').value.trim();
-      
-      if (!qrCode) {
-        alert('Digite um QR Code ou ID');
-        return;
-      }
-      
-      try {
-        const response = await fetch(`${API_BASE}/usuario/qrcode/${qrCode}`);
-        const data = await response.json();
-        
-        if (response.ok) {
-          adicionarJogadorNaMesa(data.usuario);
-          document.getElementById('qr-code-input').value = '';
-        } else {
-          alert('Erro: ' + data.error);
-        }
-      } catch (error) {
-        alert('Erro ao buscar usuário');
-      }
-    });
-    
-    // Buscar usuários
-    document.getElementById('btn-buscar').addEventListener('click', async () => {
-      const nome = document.getElementById('buscar-nome').value.trim();
-      
-      if (!nome) {
-        alert('Digite um nome para buscar');
-        return;
-      }
-      
-      try {
-        const response = await fetch(`${API_BASE}/usuario`);
-        const data = await response.json();
-        
-        const usuarios = data.usuarios.filter(u => 
-          u.nome.toLowerCase().includes(nome.toLowerCase())
-        );
-        
-        mostrarResultadosBusca(usuarios);
-      } catch (error) {
-        alert('Erro ao buscar usuários');
-      }
-    });
-    
-    function mostrarResultadosBusca(usuarios) {
-      const div = document.getElementById('resultados-busca');
-      div.innerHTML = '';
-      
-      if (usuarios.length === 0) {
-        div.innerHTML = '<p>Nenhum usuário encontrado</p>';
-        return;
-      }
-      
-      usuarios.forEach(u => {
-        const item = document.createElement('div');
-        item.style.padding = '10px';
-        item.style.border = '1px solid #ddd';
-        item.style.marginTop = '5px';
-        item.innerHTML = `
-          <strong>${u.nome}</strong> (${u.tipo})<br>
-          QR: ${u.qr_code}<br>
-          <button onclick="adicionarJogadorNaMesa({qr_code: '${u.qr_code}', nome: '${u.nome}', tipo: '${u.tipo}'})">
-            Adicionar à Mesa
-          </button>
-        `;
-        div.appendChild(item);
-      });
-    }
-    
-    function adicionarJogadorNaMesa(usuario) {
-      if (jogadoresNaMesa.find(j => j.qr_code === usuario.qr_code)) {
-        alert('Jogador já está na mesa!');
-        return;
-      }
-      
-      jogadoresNaMesa.push(usuario);
-      renderJogadores();
-    }
-    
-    function renderJogadores() {
-      const lista = document.getElementById('jogadores-na-mesa');
-      lista.innerHTML = '';
-      
-      if (jogadoresNaMesa.length === 0) {
-        lista.innerHTML = '<li>Nenhum jogador adicionado</li>';
-        return;
-      }
-      
-      jogadoresNaMesa.forEach((jogador, index) => {
-        const li = document.createElement('li');
-        li.style.padding = '10px';
-        li.style.border = '1px solid #ddd';
-        li.style.marginBottom = '5px';
-        li.innerHTML = `
-          ${index + 1}. <strong>${jogador.nome}</strong> (${jogador.tipo})<br>
-          QR: ${jogador.qr_code}<br>
-          <button onclick="removerJogador(${index})">Remover</button>
-        `;
-        lista.appendChild(li);
-      });
-    }
-    
-    function removerJogador(index) {
-      jogadoresNaMesa.splice(index, 1);
-      renderJogadores();
-    }
-    
-    // Iniciar sessão
-    document.getElementById('btn-iniciar-sessao').addEventListener('click', async () => {
-      if (jogadoresNaMesa.length === 0) {
-        alert('Adicione pelo menos um jogador');
-        return;
-      }
-      
-      const jogo = prompt('Digite o nome do jogo:');
-      if (!jogo) return;
-      
-      const qrCodes = jogadoresNaMesa.map(j => j.qr_code);
-      
-      try {
-        const response = await fetch(`${API_BASE}/sala/criar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            criador_qr_code: qrCodes[0],
-            jogo: jogo,
-            jogadores_qr_codes: qrCodes
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          alert(`Sala criada com sucesso!\nID: ${data.sala.id}\nJogadores: ${jogadoresNaMesa.length}`);
-          jogadoresNaMesa.length = 0;
-          renderJogadores();
-        } else {
-          alert('Erro: ' + data.error);
-        }
-      } catch (error) {
-        alert('Erro ao criar sala');
-      }
-    });
-    
-    renderJogadores();
-  </script>
 </body>
 </html>
