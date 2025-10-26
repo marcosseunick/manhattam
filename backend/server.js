@@ -18,6 +18,9 @@ app.use(express.static('../frontend'));
 const cadastroRoutes = require('./routes/cadastro');
 app.use('/api/cadastro', cadastroRoutes);
 
+const salaRoutes = require('./routes/sala');
+app.use('/api/sala', salaRoutes);
+
 // Rota de teste
 app.get('/api/health', (req, res) => {
   res.json({

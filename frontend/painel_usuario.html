@@ -20,8 +20,6 @@
         <!-- Placeholder para QR Code gerado dinamicamente -->
         <img id="qr-img" src="placeholder-qr.png" alt="QR Code do usuário (placeholder)" width="200" height="200" />
       </div>
-
-      <!-- Nenhuma informação pessoal é exibida nesta vista; Nome, RA e Email estão codificados no QR da carteirinha. -->
     </section>
 
     <section id="gestao-salas" aria-label="Controlo de salas do usuário">
@@ -31,58 +29,132 @@
 
       <h3 id="minhas-salas-title">Minhas Salas</h3>
       <ul id="minhas-salas" aria-labelledby="minhas-salas-title">
-        <!-- IDs das salas criadas aparecerão aqui -->
+        <!-- Salas criadas aparecerão aqui -->
       </ul>
     </section>
 
     <script>
-      // Script simples para criar e listar salas (usa localStorage para persistência local)
       (function(){
         const btnCriar = document.getElementById('btn-criar-sala');
         const lista = document.getElementById('minhas-salas');
-        const STORAGE_KEY = 'savepoint_minhas_salas_v1';
+        const API_BASE = 'http://localhost:3000/api';
+        
+        // Simular usuário logado
+        const usuarioLogado = {
+          id: '1',
+          tipo: 'aluno',
+          nome: 'João Silva'
+        };
+        
+        document.querySelector('h1').textContent = `Olá, ${usuarioLogado.nome}`;
 
-        function gerarIdSala() {
-          // Gera um ID curto: 6 caracteres alfanuméricos
-          return Math.random().toString(36).slice(2, 8).toUpperCase();
+        async function carregarSalas(){
+          try {
+            const response = await fetch(`${API_BASE}/sala/minhas/${usuarioLogado.tipo}/${usuarioLogado.id}`);
+            const data = await response.json();
+            renderSalas(data.salas || []);
+          } catch (error) {
+            console.error('Erro ao carregar salas:', error);
+            lista.innerHTML = '<li>Erro ao carregar salas</li>';
+          }
         }
 
-        function carregarSalas(){
-          const raw = localStorage.getItem(STORAGE_KEY);
-          return raw ? JSON.parse(raw) : [];
-        }
-
-        function salvarSalas(salas){
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(salas));
-        }
-
-        function renderSalas(){
-          const salas = carregarSalas();
+        function renderSalas(salas){
           lista.innerHTML = '';
           if(salas.length === 0){
             const li = document.createElement('li');
             li.textContent = 'Nenhuma sala criada.';
-            li.setAttribute('aria-live','polite');
             lista.appendChild(li);
             return;
           }
           salas.forEach(sala => {
             const li = document.createElement('li');
-            li.textContent = sala.id + (sala.createdAt ? (' — ' + new Date(sala.createdAt).toLocaleString()) : '');
+            li.style.marginBottom = '15px';
+            
+            const jogadoresText = sala.jogadores.join(', ');
+            li.innerHTML = `
+              <strong>Sala ${sala.id}</strong><br>
+              Jogo: ${sala.jogo}<br>
+              Jogadores (${sala.jogadores.length}): ${jogadoresText}<br>
+              Status: ${sala.status}
+            `;
+            
+            // Botão para iniciar sala
+            if (sala.status === 'aguardando') {
+              const btnIniciar = document.createElement('button');
+              btnIniciar.textContent = 'Iniciar Jogo';
+              btnIniciar.style.marginTop = '5px';
+              btnIniciar.onclick = () => iniciarSala(sala.id);
+              li.appendChild(btnIniciar);
+            }
+            
             lista.appendChild(li);
           });
         }
 
-        btnCriar.addEventListener('click', function(){
-          const salas = carregarSalas();
-          const novoId = gerarIdSala();
-          salas.push({ id: novoId, createdAt: Date.now() });
-          salvarSalas(salas);
-          renderSalas();
+        async function iniciarSala(salaId) {
+          try {
+            const response = await fetch(`${API_BASE}/sala/iniciar/${salaId}`, {
+              method: 'POST'
+            });
+            const data = await response.json();
+            if (response.ok) {
+              alert('Sala iniciada! Bom jogo!');
+              carregarSalas();
+            } else {
+              alert('Erro: ' + data.error);
+            }
+          } catch (error) {
+            console.error('Erro ao iniciar sala:', error);
+            alert('Erro ao iniciar sala');
+          }
+        }
+
+        btnCriar.addEventListener('click', async function(){
+          const nomeJogo = prompt('Nome do jogo:');
+          if (!nomeJogo) return;
+          
+          // Pedir nomes dos jogadores
+          const jogadoresInput = prompt('Digite os nomes dos jogadores separados por vírgula:\n(exemplo: João Silva, Maria Santos, Pedro Costa)');
+          if (!jogadoresInput) return;
+          
+          const jogadores = jogadoresInput.split(',').map(j => j.trim()).filter(j => j);
+          
+          if (jogadores.length === 0) {
+            alert('Você precisa informar pelo menos um jogador');
+            return;
+          }
+          
+          try {
+            const response = await fetch(`${API_BASE}/sala/criar`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                criador_id: usuarioLogado.id,
+                criador_tipo: usuarioLogado.tipo,
+                criador_nome: usuarioLogado.nome,
+                jogo: nomeJogo,
+                jogadores: jogadores
+              })
+            });
+            const data = await response.json();
+            if (response.ok) {
+              alert(`Sala criada: ${data.sala.id}\n\nJogadores:\n${jogadores.join('\n')}`);
+              carregarSalas();
+            } else {
+              alert('Erro: ' + data.error);
+            }
+          } catch (error) {
+            console.error('Erro ao criar sala:', error);
+            alert('Erro ao criar sala');
+          }
         });
 
-        // Inicializa lista ao carregar a página
-        renderSalas();
+        // Carregar salas ao iniciar
+        carregarSalas();
+        
+        // Auto-refresh a cada 10 segundos
+        setInterval(carregarSalas, 10000);
       })();
     </script>
   </main>
