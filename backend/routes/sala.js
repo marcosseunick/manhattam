@@ -5,8 +5,8 @@ const SalaController = require('../controllers/salaController');
 // Criar nova sala
 router.post('/criar', SalaController.criarSala);
 
-// Listar salas do usuário (por QR Code)
-router.get('/minhas/:qrCode', SalaController.minhasSalas);
+// Listar salas do usuário (por tipo e ID)
+router.get('/minhas/:userType/:userId', SalaController.minhasSalas);
 
 // Listar salas disponíveis
 router.get('/disponiveis', SalaController.salasDisponiveis);

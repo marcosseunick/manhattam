@@ -4,23 +4,23 @@ class SalaController {
   // Criar nova sala
   static async criarSala(req, res) {
     try {
-      const { criador_qr_code, nome, jogo, jogadores_qr_codes } = req.body;
+      const { criador_id, criador_tipo, criador_nome, jogo, jogadores } = req.body;
 
       // Validação básica
-      if (!criador_qr_code || criador_qr_code.trim() === '') {
+      if (!criador_id || criador_id.trim() === '') {
         return res.status(400).json({
-          error: 'QR Code do criador é obrigatório'
+          error: 'ID do criador é obrigatório'
         });
       }
 
-      if (!jogadores_qr_codes || !Array.isArray(jogadores_qr_codes) || jogadores_qr_codes.length === 0) {
+      if (!jogadores || !Array.isArray(jogadores) || jogadores.length === 0) {
         return res.status(400).json({
-          error: 'Lista de jogadores é obrigatória (array de QR Codes)'
+          error: 'Lista de jogadores é obrigatória (array de nomes)'
         });
       }
 
-      // Validar que todos os QR Codes são válidos
-      const jogadoresValidos = jogadores_qr_codes.filter(j => j && j.trim() !== '');
+      // Validar que todos os nomes são válidos
+      const jogadoresValidos = jogadores.filter(j => j && j.trim() !== '');
       if (jogadoresValidos.length === 0) {
         return res.status(400).json({
           error: 'Pelo menos um jogador válido é necessário'
@@ -28,10 +28,11 @@ class SalaController {
       }
 
       const salaId = await Sala.create({
-        criador_qr_code: criador_qr_code.trim(),
-        nome: nome || 'Sala sem nome',
+        criador_id: criador_id.trim(),
+        criador_tipo: criador_tipo || 'aluno',
+        criador_nome: criador_nome || 'Sala sem nome',
         jogo: jogo || 'Jogo a definir',
-        jogadores_qr_codes: jogadoresValidos.map(j => j.trim())
+        jogadores: jogadoresValidos.map(j => j.trim())
       });
 
       const sala = await Sala.findById(salaId);
@@ -49,18 +50,18 @@ class SalaController {
     }
   }
 
-  // Listar salas do usuário (por QR Code)
+  // Listar salas do usuário (por tipo e ID)
   static async minhasSalas(req, res) {
     try {
-      const { qrCode } = req.params;
+      const { userType, userId } = req.params;
 
-      if (!qrCode) {
+      if (!userId) {
         return res.status(400).json({
-          error: 'QR Code do usuário é obrigatório'
+          error: 'ID do usuário é obrigatório'
         });
       }
 
-      const salas = await Sala.findByUser(qrCode);
+      const salas = await Sala.findByUser(userId);
 
       res.json({
         salas,
@@ -93,11 +94,11 @@ class SalaController {
     }
   }
 
-  // Adicionar jogador à sala (por QR Code)
+  // Adicionar jogador à sala (por nome)
   static async adicionarJogador(req, res) {
     try {
       const { salaId } = req.params;
-      const { qr_code_jogador } = req.body;
+      const { nome_jogador } = req.body;
 
       if (!salaId) {
         return res.status(400).json({
@@ -105,13 +106,13 @@ class SalaController {
         });
       }
 
-      if (!qr_code_jogador || qr_code_jogador.trim() === '') {
+      if (!nome_jogador || nome_jogador.trim() === '') {
         return res.status(400).json({
-          error: 'QR Code do jogador é obrigatório'
+          error: 'Nome do jogador é obrigatório'
         });
       }
 
-      const resultado = await Sala.adicionarJogador(salaId, qr_code_jogador.trim());
+      const resultado = await Sala.adicionarJogador(salaId, nome_jogador.trim());
 
       if (!resultado.success) {
         return res.status(400).json({
@@ -132,11 +133,11 @@ class SalaController {
     }
   }
 
-  // Remover jogador da sala (por QR Code)
+  // Remover jogador da sala (por nome)
   static async removerJogador(req, res) {
     try {
       const { salaId } = req.params;
-      const { qr_code_jogador } = req.body;
+      const { nome_jogador } = req.body;
 
       if (!salaId) {
         return res.status(400).json({
@@ -144,13 +145,13 @@ class SalaController {
         });
       }
 
-      if (!qr_code_jogador || qr_code_jogador.trim() === '') {
+      if (!nome_jogador || nome_jogador.trim() === '') {
         return res.status(400).json({
-          error: 'QR Code do jogador é obrigatório'
+          error: 'Nome do jogador é obrigatório'
         });
       }
 
-      const resultado = await Sala.removerJogador(salaId, qr_code_jogador.trim());
+      const resultado = await Sala.removerJogador(salaId, nome_jogador.trim());
 
       if (!resultado.success) {
         return res.status(400).json({
