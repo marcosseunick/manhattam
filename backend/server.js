@@ -34,6 +34,9 @@ app.use('/api/relatorio', relatorioRoutes);
 const monitorRoutes = require('./routes/monitor');
 app.use('/api/monitor', monitorRoutes);
 
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
+
 // Rota de teste
 app.get('/api/health', (req, res) => {
   res.json({

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Savepoint Ludoteca — Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "DINPro";
+    }
+
+    body {
+      background: linear-gradient(135deg, #003366, #4f46e5);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    main {
+      background: white;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #6b7280;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      color: #003366;
+      border-bottom-color: #003366;
+    }
+
+    .tab:hover {
+      color: #003366;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    form.hidden {
+      display: none;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #444;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #4f46e5;
+      outline: none;
+    }
+
+    button[type="submit"] {
+      background: #003366;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 4px;
+    }
+
+    button[type="submit"]:hover {
+      background: #4338ca;
+    }
+
+    #mensagem {
+      margin-top: 16px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    footer {
+      margin-top: 24px;
+      text-align: center;
+      color: white;
+      font-size: 14px;
+    }
+
+    .info {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #0369a1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Savepoint Ludoteca</h1>
+      <p>Escolha o tipo de acesso</p>
+    </header>
+
+    <main>
+      <div class="tabs">
+        <button class="tab active" onclick="mostrarForm('usuario')">Usuário</button>
+        <button class="tab" onclick="mostrarForm('monitor')">Admin</button>
+      </div>
+
+      <!-- Formulário de Usuário -->
+      <form id="form-usuario" onsubmit="loginUsuario(event)">
+        <div class="info">
+          💡 Digite seu ID ou QR Code para entrar
+        </div>
+        <div>
+          <label for="id-usuario">Seu ID ou QR Code</label>
+          <input id="id-usuario" name="id" type="text" required placeholder="Ex: 412345 ou ALU-412345-A3F8K2" />
+        </div>
+        <button type="submit">Entrar</button>
+      </form>
+
+      <!-- Formulário de Monitor/Admin -->
+      <form id="form-monitor" class="hidden" onsubmit="loginMonitor(event)">
+        <div class="info">
+          🔐 Faça login com seu email e senha
+        </div>
+        <div>
+          <label for="email-monitor">Email</label>
+          <input id="email-monitor" name="email" type="email" required placeholder="seu@email.com" />
+        </div>
+        <div>
+          <label for="senha-monitor">Senha</label>
+          <input id="senha-monitor" name="senha" type="password" required placeholder="Sua senha" />
+        </div>
+        <button type="submit">Entrar</button>
+      </form>
+
+      <div id="mensagem"></div>
+    </main>
+
+    <footer>
+      <small>© Savepoint Ludoteca</small>
+    </footer>
+  </div>
+
+  <script>
+    function mostrarForm(tipo) {
+      // Atualizar tabs
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+
+      // Mostrar/esconder formulários
+      document.getElementById('form-usuario').classList.toggle('hidden', tipo !== 'usuario');
+      document.getElementById('form-monitor').classList.toggle('hidden', tipo !== 'monitor');
+    }
+
+    async function loginUsuario(e) {
+      e.preventDefault();
+      
+      const id = document.getElementById('id-usuario').value;
+      const mensagemDiv = document.getElementById('mensagem');
+      
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/usuario', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          mensagemDiv.innerHTML = '<p style="color: green;">Login realizado com sucesso!</p>';
+          
+          // Salvar dados do usuário no localStorage
+          localStorage.setItem('usuario', JSON.stringify(data.usuario));
+          
+          // Redirecionar para página de interesse
+          setTimeout(() => {
+            window.location.href = 'selecionar-interesse.html';
+          }, 1000);
+        } else {
+          mensagemDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+        }
+      } catch (error) {
+        mensagemDiv.innerHTML = '<p style="color: red;">Erro ao conectar com o servidor.</p>';
+        console.error('Erro:', error);
+      }
+    }
+
+    async function loginMonitor(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('email-monitor').value;
+      const senha = document.getElementById('senha-monitor').value;
+      const mensagemDiv = document.getElementById('mensagem');
+      
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/monitor', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, senha }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          mensagemDiv.innerHTML = '<p style="color: green;">Login realizado com sucesso!</p>';
+          
+          // Salvar dados do monitor no localStorage
+          localStorage.setItem('monitor', JSON.stringify(data.monitor));
+          
+          // Redirecionar baseado no nível
+          setTimeout(() => {
+            if (data.monitor.nivel === 'admin_senior') {
+              window.location.href = 'painel_adm_senior.html';
+            } else {
+              window.location.href = 'painel_adm.html';
+            }
+          }, 1000);
+        } else {
+          mensagemDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+        }
+      } catch (error) {
+        mensagemDiv.innerHTML = '<p style="color: red;">Erro ao conectar com o servidor.</p>';
+        console.error('Erro:', error);
+      }
+    }
+  </script>
+</body>
+</html>
+
