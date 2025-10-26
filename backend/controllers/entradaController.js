@@ -111,47 +111,6 @@ class EntradaController {
       });
     }
   }
-
-  // Registrar interesse do dia
-  static async registrarInteresse(req, res) {
-    try {
-      const { id_unico_usuario, interesse } = req.body;
-
-      if (!id_unico_usuario || id_unico_usuario.trim() === '') {
-        return res.status(400).json({
-          error: 'ID do usuário é obrigatório'
-        });
-      }
-
-      if (!interesse || interesse.trim() === '') {
-        return res.status(400).json({
-          error: 'Interesse é obrigatório'
-        });
-      }
-
-      // Verificar se usuário existe
-      const usuario = await Usuario.findById(id_unico_usuario);
-      if (!usuario) {
-        return res.status(404).json({
-          error: 'Usuário não encontrado'
-        });
-      }
-
-      // Registrar interesse
-      const registro = await Entrada.registrarInteresse(id_unico_usuario, interesse);
-
-      res.status(201).json({
-        message: 'Interesse registrado com sucesso!',
-        registro
-      });
-
-    } catch (error) {
-      console.error('Erro ao registrar interesse:', error);
-      res.status(500).json({
-        error: 'Erro ao registrar interesse. Tente novamente.'
-      });
-    }
-  }
 }
 
 module.exports = EntradaController;

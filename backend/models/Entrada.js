@@ -2,8 +2,8 @@ const fs = require('fs').promises;
 const path = require('path');
 
 class Entrada {
-  static CSV_FILE = path.join(__dirname, '../data/registros.csv');
-  static CSV_HEADERS = 'id_unicoUsuario,interesse,data,periodo,tempo_permanencia,monitor\n';
+  static CSV_FILE = path.join(__dirname, '../data/entradas.csv');
+  static CSV_HEADERS = 'id,usuario_id,usuario_tipo,usuario_nome,qr_code,data_hora,dia_semana,periodo\n';
 
   // Inicializar arquivo CSV
   static async initializeCSV() {
@@ -25,53 +25,48 @@ class Entrada {
     return lines
       .filter(line => line.trim())
       .map(line => {
-        const [id_unicoUsuario, interesse, data, periodo, tempo_permanencia, monitor] = line.split(',');
+        const [id, usuario_id, usuario_tipo, usuario_nome, qr_code, data_hora, dia_semana, periodo] = line.split(',');
         return {
-          id_unicoUsuario,
-          interesse,
-          data,
-          periodo,
-          tempo_permanencia,
-          monitor
+          id: parseInt(id),
+          usuario_id,
+          usuario_tipo,
+          usuario_nome,
+          qr_code,
+          data_hora,
+          dia_semana,
+          periodo
         };
       });
   }
 
-  // Registrar novo registro com interesse
-  static async registrarInteresse(idUnicoUsuario, interesse) {
+  // Registrar nova entrada (check-in)
+  static async registrar(usuario) {
     await this.initializeCSV();
     
-    const agora = new Date();
-    const dia = agora.getDate().toString().padStart(2, '0');
-    const mes = (agora.getMonth() + 1).toString().padStart(2, '0');
-    const ano = agora.getFullYear();
-    const data = `${dia}/${mes}/${ano}`;
+    const entradas = await this.readAll();
+    const novoId = entradas.length > 0 ? Math.max(...entradas.map(e => e.id)) + 1 : 1;
     
+    const agora = new Date();
+    const dataHora = agora.toISOString();
+    const diaSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][agora.getDay()];
     const hora = agora.getHours();
     
     // Determinar período
-    let periodo = '';
+    let periodo = 'Manhã';
     if (hora >= 12 && hora < 18) periodo = 'Tarde';
     else if (hora >= 18) periodo = 'Noite';
-    // Manhã fica vazio
     
-    // Tempo de permanência começa em 0
-    const tempo_permanencia = '0';
-    
-    // Monitor fica vazio (preenchido depois)
-    const monitor = '';
-    
-    const novaLinha = `${idUnicoUsuario},${interesse},${data},${periodo},${tempo_permanencia},${monitor}\n`;
+    const novaLinha = `${novoId},${usuario.id},${usuario.tipo},${usuario.nome},${usuario.qr_code},${dataHora},${diaSemana},${periodo}\n`;
     
     await fs.appendFile(this.CSV_FILE, novaLinha);
     
     return {
-      id_unicoUsuario: idUnicoUsuario,
-      interesse,
-      data,
-      periodo,
-      tempo_permanencia,
-      monitor
+      id: novoId,
+      usuario_id: usuario.id,
+      usuario_nome: usuario.nome,
+      data_hora: dataHora,
+      dia_semana: diaSemana,
+      periodo
     };
   }
 
@@ -81,87 +76,71 @@ class Entrada {
     return entradas.find(e => e.id === id);
   }
 
-  // Buscar registros de um usuário
+  // Buscar entradas de um usuário
   static async findByUsuario(usuarioId) {
-    const registros = await this.readAll();
-    return registros.filter(e => e.id_unicoUsuario === usuarioId);
+    const entradas = await this.readAll();
+    return entradas.filter(e => e.usuario_id === usuarioId);
   }
 
-  // Contar registros de um usuário
+  // Contar visitas de um usuário
   static async contarVisitas(usuarioId) {
-    const registros = await this.findByUsuario(usuarioId);
-    return registros.length;
+    const entradas = await this.findByUsuario(usuarioId);
+    return entradas.length;
   }
 
-  // Último registro de um usuário
+  // Última visita de um usuário
   static async ultimaVisita(usuarioId) {
-    const registros = await this.findByUsuario(usuarioId);
-    if (registros.length === 0) return null;
+    const entradas = await this.findByUsuario(usuarioId);
+    if (entradas.length === 0) return null;
     
-    return registros[registros.length - 1];
+    return entradas[entradas.length - 1];
   }
 
-  // Registros de hoje
+  // Entradas de hoje
   static async entradasHoje() {
-    const registros = await this.readAll();
-    const hoje = new Date();
-    const dia = hoje.getDate().toString().padStart(2, '0');
-    const mes = (hoje.getMonth() + 1).toString().padStart(2, '0');
-    const ano = hoje.getFullYear();
-    const dataHoje = `${dia}/${mes}/${ano}`;
+    const entradas = await this.readAll();
+    const hoje = new Date().toISOString().split('T')[0];
     
-    return registros.filter(e => e.data === dataHoje);
+    return entradas.filter(e => e.data_hora.startsWith(hoje));
   }
 
-  // Registros por período
+  // Entradas por período
   static async entrdasPorPeriodo(dataInicio, dataFim) {
-    const registros = await this.readAll();
+    const entradas = await this.readAll();
     
-    return registros.filter(e => {
-      // Converter formato DD/MM/YYYY para comparação
-      const [dia, mes, ano] = e.data.split('/');
-      const dataEntrada = `${ano}-${mes}-${dia}`;
-      
-      const [diaIni, mesIni, anoIni] = dataInicio.split('/');
-      const dataInicioFormatada = `${anoIni}-${mesIni}-${diaIni}`;
-      
-      const [diaFim, mesFim, anoFim] = dataFim.split('/');
-      const dataFimFormatada = `${anoFim}-${mesFim}-${diaFim}`;
-      
-      return dataEntrada >= dataInicioFormatada && dataEntrada <= dataFimFormatada;
+    return entradas.filter(e => {
+      const dataEntrada = e.data_hora.split('T')[0];
+      return dataEntrada >= dataInicio && dataEntrada <= dataFim;
     });
   }
 
   // Estatísticas gerais
   static async estatisticas() {
-    const registros = await this.readAll();
+    const entradas = await this.readAll();
     const hoje = await this.entradasHoje();
     
-    // Usuários únicos
-    const usuariosUnicos = new Set(registros.map(e => e.id_unicoUsuario)).size;
-    const usuariosHoje = new Set(hoje.map(e => e.id_unicoUsuario)).size;
+    // Visitantes únicos
+    const visitantesUnicos = new Set(entradas.map(e => e.usuario_id)).size;
+    const visitantesHoje = new Set(hoje.map(e => e.usuario_id)).size;
     
-    // Por interesse
-    const porInteresse = {};
-    registros.forEach(e => {
-      if (e.interesse) {
-        porInteresse[e.interesse] = (porInteresse[e.interesse] || 0) + 1;
-      }
+    // Por tipo
+    const porTipo = {};
+    entradas.forEach(e => {
+      porTipo[e.usuario_tipo] = (porTipo[e.usuario_tipo] || 0) + 1;
     });
     
     // Por período
     const porPeriodo = {};
-    registros.forEach(e => {
-      const periodo = e.periodo || 'Manhã';
-      porPeriodo[periodo] = (porPeriodo[periodo] || 0) + 1;
+    entradas.forEach(e => {
+      porPeriodo[e.periodo] = (porPeriodo[e.periodo] || 0) + 1;
     });
     
     return {
-      total_registros: registros.length,
-      registros_hoje: hoje.length,
-      usuarios_unicos: usuariosUnicos,
-      usuarios_hoje: usuariosHoje,
-      por_interesse: porInteresse,
+      total_entradas: entradas.length,
+      entradas_hoje: hoje.length,
+      visitantes_unicos: visitantesUnicos,
+      visitantes_hoje: visitantesHoje,
+      por_tipo: porTipo,
       por_periodo: porPeriodo
     };
   }

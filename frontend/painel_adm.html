@@ -102,34 +102,15 @@
         input, button { font-size: 15px; }
       }
     </style>
-    <script src="auth.js"></script>
   </head>
 <body>
-  <script>
-    // Verificar autenticação de monitor
-    const monitor = verificarMonitor();
-    
-    // Função de logout
-    function fazerLogout() {
-      if (confirm('Deseja realmente sair?')) {
-        localStorage.removeItem('monitor');
-        window.location.href = 'login.html';
-      }
-    }
-  </script>
-  
   <header>
-    <h1 id="monitor-nome">Monitor de Sessão</h1>
+    <h1>Monitor de Sessão</h1>
     <nav>
-      <a href="#" onclick="fazerLogout()" title="Sair">Sair</a>
+      <a href="#" title="Sair">Sair</a>
     </nav>
   </header>
-  
-  <script>
-    // Atualizar nome do monitor
-    document.getElementById('monitor-nome').textContent = `Monitor de Sessão - ${monitor.nome}`;
-  </script>
-  
+
   <main>
     <section aria-label="Ferramentas do monitor">
       <article>

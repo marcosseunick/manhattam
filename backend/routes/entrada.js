@@ -2,9 +2,6 @@ const express = require('express');
 const router = express.Router();
 const EntradaController = require('../controllers/entradaController');
 
-// Registrar interesse do dia
-router.post('/interesse', EntradaController.registrarInteresse);
-
 // Registrar entrada (check-in)
 router.post('/checkin', EntradaController.registrarEntrada);
 

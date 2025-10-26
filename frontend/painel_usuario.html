@@ -105,9 +105,9 @@
   </head>
 <body>
   <header>
-    <h1 id="usuario-nome">Olá</h1>
+    <h1>Olá, [Nome]</h1>
     <nav>
-      <a href="#" onclick="fazerLogout()" title="Sair">Sair</a>
+      <a href="#" title="Sair">Sair</a>
     </nav>
   </header>
 
@@ -131,18 +131,20 @@
       </ul>
     </section>
 
-    <script src="auth.js"></script>
     <script>
-      // Verificar autenticação
-      const usuarioLogado = verificarUsuario();
-      
-      // Atualizar nome no header
-      document.getElementById('usuario-nome').textContent = `Olá, ${usuarioLogado.nome}`;
-      
       (function(){
         const btnCriar = document.getElementById('btn-criar-sala');
         const lista = document.getElementById('minhas-salas');
         const API_BASE = 'http://localhost:3000/api';
+        
+        // Simular usuário logado
+        const usuarioLogado = {
+          id: '1',
+          tipo: 'aluno',
+          nome: 'João Silva'
+        };
+        
+        document.querySelector('h1').textContent = `Olá, ${usuarioLogado.nome}`;
 
         async function carregarSalas(){
           try {
@@ -252,15 +254,6 @@
         // Auto-refresh a cada 10 segundos
         setInterval(carregarSalas, 10000);
       })();
-    </script>
-    <script>
-      // Expor função de logout
-      function fazerLogout() {
-        if (confirm('Deseja realmente sair?')) {
-          localStorage.removeItem('usuario');
-          window.location.href = 'login.html';
-        }
-      }
     </script>
   </main>
 
