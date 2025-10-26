@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monitor de Sessão — ADM</title>
+</head>
+<body>
+  <header>
+    <h1>Monitor de Sessão</h1>
+    <nav>
+      <a href="#" title="Sair">Sair</a>
+    </nav>
+  </header>
+
+  <main>
+    <section aria-label="Ferramentas do monitor">
+      <article>
+        <button type="button">Iniciar sessão na mesa</button>
+      </article>
+
+      <!-- Botão 'Escanear Carteirinha' removido conforme solicitado -->
+
+      <article>
+        <div>
+          <label for="id-sala">Inserir ID da Sala</label>
+          <input id="id-sala" name="id-sala" type="text" />
+          <button type="button">Adicionar</button>
+        </div>
+      </article>
+    </section>
+
+    <section aria-labelledby="sessao-atual">
+      <h2 id="sessao-atual">Sessão Atual</h2>
+      <ul id="jogadores-na-mesa">
+        <!-- Lista de jogadores na mesa aparecerá aqui -->
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <small>© Savepoint Ludoteca</small>
+  </footer>
+</body>
+</html>

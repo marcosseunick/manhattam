@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel ADM Sênior — Dashboard</title>
+</head>
+<body>
+  <header>
+    <h1>Painel de Gestão — Savepoint Ludoteca</h1>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="Menu lateral">
+      <ul>
+        <li><a href="#dashboard-dados">Dashboard de Dados</a></li>
+        <li><a href="#gestao-utilizadores">Gestão de Utilizadores</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="dashboard-dados" aria-labelledby="dashboard-title">
+        <h2 id="dashboard-title">Dashboard de Dados</h2>
+
+        <div class="cards">
+          <div class="card" aria-labelledby="card-visitantes">
+            <h3 id="card-visitantes">Total de Visitantes Únicos</h3>
+            <p>[placeholder]</p>
+          </div>
+
+          <div class="card" aria-labelledby="card-tempo">
+            <h3 id="card-tempo">Tempo Médio de Permanência</h3>
+            <p>[placeholder]</p>
+          </div>
+
+          <div class="card" aria-labelledby="card-perfil">
+            <h3 id="card-perfil">Análise de Perfil (Sexo, Idade, Curso)</h3>
+            <p>[placeholder]</p>
+          </div>
+
+          <div class="card" aria-labelledby="card-frequencia">
+            <h3 id="card-frequencia">Frequência (por dia, por semana)</h3>
+            <p>[placeholder]</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="gestao-utilizadores" aria-labelledby="gestao-title">
+        <h2 id="gestao-title">Gestão de Utilizadores</h2>
+
+        <table border="1" summary="Tabela de utilizadores">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Tipo (Usuário/ADM)</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Linhas de utilizadores irão aqui -->
+            <tr>
+              <td>Exemplo</td>
+              <td>exemplo@savepoint.local</td>
+              <td>Usuário</td>
+              <td><button type="button">Promover a ADM</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <small>© Savepoint Ludoteca</small>
+  </footer>
+</body>
+</html>
