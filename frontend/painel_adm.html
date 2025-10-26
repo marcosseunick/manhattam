@@ -14,7 +14,7 @@
       }
 
       body {
-        background: linear-gradient(135deg, #003366, #4f46e5);
+        background: linear-gradient(135deg, #003366, #003366);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
@@ -74,22 +74,24 @@
       input:focus { border-color: #4f46e5; outline: none; }
 
       button {
-        background: #003366;
+        border: #2563eb;
         color: white;
-        border: none;
-        padding: 12px;
+        padding: 10px 16px;
         border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
+        font-size: 15px;
+        font-weight: 500;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: all 0.2s;
       }
 
-      button:hover { background: #4338ca; }
+      button:hover { 
+        background: #1d4ed8;
+        transform: translateY(-1px);
+      }
 
       p { margin-top: 16px; }
 
-      a { color: #003366; text-decoration: none; font-weight: 500; }
+      a { color: #cddceb; text-decoration: none; font-weight: 500; }
       a:hover { text-decoration: underline; }
 
       footer { margin-top: 24px; text-align: center; color: white; font-size: 14px; }

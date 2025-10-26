@@ -1,123 +1,103 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LUDOPASS - unasp</title>
-    <style>
-      /* Reset e fontes */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Roboto, sans-serif;
-      }
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LUDOPASS - unasp </title>
+<style>
+  :root {
+    --azul-unasp: #003366;
+    --branco: #ffffff;
+    --cinza: #f5f6fa;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+  }
 
-      body {
-        background: linear-gradient(135deg, #003366, #4f46e5);
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: #333;
-        padding: 16px;
-      }
+  body {
+    background: var(--cinza);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
 
-      header, main, footer {
-        width: 100%;
-        max-width: 360px;
-      }
+  .carteirinha {
+    width: 360px;
+    height: 210px;
+    background: linear-gradient(135deg, var(--azul-unasp), #0066cc, #0052a3);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: var(--branco);
+    position: relative;
+  }
 
-      header {
-        text-align: center;
-        color: white;
-        margin-bottom: 24px;
-      }
+  /* Topo com logos */
+  .topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-      header h1 {
-        font-size: 24px;
-        letter-spacing: 0.5px;
-      }
+  .topo img {
+    height: 40px;
+    object-fit: contain;
+  }
 
-      main {
-        background: white;
-        padding: 24px;
-        border-radius: 14px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        width: 100%;
-      }
+  /* Conteúdo principal */
+  .conteudo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
 
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
+  .dados {
+    flex: 1;
+  }
 
-      label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: 600;
-        color: #444;
-      }
+  .dados h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
 
-      input {
-        width: 100%;
-        padding: 10px 12px;
-        border: 2px solid #ccc;
-        border-radius: 8px;
-        font-size: 16px;
-        transition: border-color 0.3s;
-      }
+  .dados p {
+    margin: 5px 0;
+    font-size: 14px;
+    opacity: 0.9;
+  }
 
-      input:focus {
-        border-color: #4f46e5;
-        outline: none;
-      }
+  /* QR Code */
+  .qrcode {
+    width: 100px;
+    height: 100px;
+    background: var(--branco);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+  }
 
-      button {
-        background: #003366;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.3s;
-      }
+  .qrcode img {
+    width: 95px;
+    height: 95px;
+  }
 
-      button:hover {
-        background: #4338ca;
-      }
+  /* Rodapé */
+  .rodape {
+    border-top: 1px solid rgba(255,255,255,0.3);
+    margin-top: 8px;
+    padding-top: 6px;
+    text-align: center;
+    font-size: 12px;
+    opacity: 0.9;
+  }
 
-      p { margin-top: 16px; }
-
-      a {
-        color: #003366;
-        text-decoration: none;
-        font-weight: 500;
-      }
-
-      a:hover { text-decoration: underline; }
-
-      footer {
-        margin-top: 24px;
-        text-align: center;
-        color: white;
-        font-size: 14px;
-      }
-
-      #mensagem { margin-top: 14px; font-size: 15px; }
-
-      @media (max-width: 400px) {
-        header h1 { font-size: 22px; }
-        main { padding: 20px; border-radius: 12px; }
-        input, button { font-size: 15px; }
-      }
-    </style>
-  </head>
+</style>
+</head>
 <body>
 
 <div class="carteirinha">
