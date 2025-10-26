@@ -4,7 +4,124 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Savepoint Ludoteca — Cadastro de Aluno</title>
+    <style>
+      /* Reset e fontes */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "DINPro";
+      }
+
+      body {
+        background: linear-gradient(135deg, #003366, #7c3aed);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #333;
+      }
+
+      header, main, footer {
+        width: 100%;
+        max-width: 480px;
+      }
+
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 24px;
+      }
+
+      header h1 {
+        font-size: 28px;
+        letter-spacing: 1px;
+      }
+
+      main {
+        background: white;
+        padding: 32px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      form div:first-child {
+        text-align: left; /* campo RA alinhado à esquerda */
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #444;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      input:focus {
+        border-color: #4f46e5;
+        outline: none;
+      }
+
+      button {
+        background: #003366;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background: #4338ca;
+      }
+
+      p {
+        margin-top: 20px;
+      }
+
+      a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      footer {
+        margin-top: 24px;
+        text-align: center;
+        color: white;
+        font-size: 14px;
+      }
+
+      #mensagem {
+        margin-top: 16px;
+        font-size: 15px;
+      }
+    </style>
   </head>
+
   <body>
     <header>
       <h1>Cadastro de Aluno</h1>
@@ -51,7 +168,6 @@
           
           if (response.ok) {
             mensagemDiv.innerHTML = `<p style="color: green;">${data.message}</p>`;
-            // Redirecionar após sucesso
             setTimeout(() => {
               window.location.href = 'login.html';
             }, 2000);
@@ -66,4 +182,3 @@
     </script>
   </body>
 </html>
-
