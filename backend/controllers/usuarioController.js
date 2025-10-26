@@ -73,7 +73,7 @@ class UsuarioController {
   // Cadastrar visitante/comunidade
   static async cadastrarVisitante(req, res) {
     try {
-      const { nome, tipo, telefone, email, interesses } = req.body;
+      const { nome, tipo, telefone, email, interesses, dependentes } = req.body;
 
       if (!nome || nome.trim() === '') {
         return res.status(400).json({
@@ -87,7 +87,7 @@ class UsuarioController {
         });
       }
 
-      // Criar usuário
+      // Criar visitante principal
       const usuario = await Usuario.criarVisitante({
         nome: nome.trim(),
         tipo,
@@ -96,6 +96,32 @@ class UsuarioController {
         interesses: interesses || []
       });
 
+      // Cadastrar dependentes se houver
+      const dependentesCadastrados = [];
+      if (dependentes && Array.isArray(dependentes) && dependentes.length > 0) {
+        for (const dependente of dependentes) {
+          if (dependente.nome && dependente.telefone && dependente.relacao) {
+            const senha = Usuario.gerarSenhaAutomatica(dependente.nome, dependente.telefone);
+            
+            const dependenteUsuario = await Usuario.criarVisitante({
+              nome: dependente.nome.trim(),
+              tipo: 'visitante',
+              telefone: dependente.telefone,
+              email: '',
+              interesses: [],
+              responsavel_id: usuario.id,
+              relacao: dependente.relacao
+            });
+            
+            dependentesCadastrados.push({
+              nome: dependenteUsuario.nome,
+              senha: senha,
+              qr_code: dependenteUsuario.qr_code
+            });
+          }
+        }
+      }
+
       res.status(201).json({
         message: 'Visitante cadastrado com sucesso!',
         usuario: {
@@ -103,8 +129,10 @@ class UsuarioController {
           tipo: usuario.tipo,
           nome: usuario.nome,
           qr_code: usuario.qr_code,
+          senha: usuario.senha,
           interesses: usuario.interesses
-        }
+        },
+        dependentes: dependentesCadastrados
       });
 
     } catch (error) {

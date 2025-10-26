@@ -4,7 +4,7 @@ const QRCodeService = require('../services/QRCodeService');
 
 class Usuario {
   static CSV_FILE = path.join(__dirname, '../data/usuarios.csv');
-  static CSV_HEADERS = 'id,tipo,ra,nome,telefone,email,sexo,data_nascimento,idade,curso,qr_code,interesses,tipo_aluno,data_cadastro,ativo\n';
+  static CSV_HEADERS = 'id,tipo,ra,nome,telefone,email,sexo,data_nascimento,idade,curso,qr_code,interesses,tipo_aluno,responsavel_id,relacao,data_cadastro,ativo\n';
 
   // Inicializar arquivo CSV
   static async initializeCSV() {
@@ -26,7 +26,7 @@ class Usuario {
     return lines
       .filter(line => line.trim())
       .map(line => {
-        const [id, tipo, ra, nome, telefone, email, sexo, data_nascimento, idade, curso, qr_code, interesses, tipo_aluno, data_cadastro, ativo] = line.split(',');
+        const [id, tipo, ra, nome, telefone, email, sexo, data_nascimento, idade, curso, qr_code, interesses, tipo_aluno, responsavel_id, relacao, data_cadastro, ativo] = line.split(',');
         return {
           id,
           tipo,
@@ -41,6 +41,8 @@ class Usuario {
           qr_code,
           interesses: interesses ? interesses.split('|') : [],
           tipo_aluno,
+          responsavel_id,
+          relacao,
           data_cadastro,
           ativo: ativo === 'true'
         };
@@ -56,7 +58,7 @@ class Usuario {
     const dataCadastro = new Date().toISOString();
     const interessesStr = interesses.join('|');
     
-    const novaLinha = `${ra},aluno,${ra},${dadosAluno.Nome},${dadosAluno.Telefone},${dadosAluno.Email},${dadosAluno.Sexo},${dadosAluno.Data_Nascimento},${dadosAluno.Idade},${dadosAluno.Curso},${qrCode},${interessesStr},${tipoAluno},${dataCadastro},true\n`;
+    const novaLinha = `${ra},aluno,${ra},${dadosAluno.Nome},${dadosAluno.Telefone},${dadosAluno.Email},${dadosAluno.Sexo},${dadosAluno.Data_Nascimento},${dadosAluno.Idade},${dadosAluno.Curso},${qrCode},${interessesStr},${tipoAluno},,${dataCadastro},true\n`;
     
     await fs.appendFile(this.CSV_FILE, novaLinha);
     
@@ -87,7 +89,10 @@ class Usuario {
     // Gerar senha automática: 2 primeiras letras do nome + 4 últimos dígitos do telefone
     const senha = this.gerarSenhaAutomatica(dadosVisitante.nome, dadosVisitante.telefone);
     
-    const novaLinha = `${novoId},${dadosVisitante.tipo},,${dadosVisitante.nome},${dadosVisitante.telefone || ''},${dadosVisitante.email || ''},,,,${qrCode},${interessesStr},,${dataCadastro},true\n`;
+    const responsavel_id = dadosVisitante.responsavel_id || '';
+    const relacao = dadosVisitante.relacao || '';
+    
+    const novaLinha = `${novoId},${dadosVisitante.tipo},,${dadosVisitante.nome},${dadosVisitante.telefone || ''},${dadosVisitante.email || ''},,,,${qrCode},${interessesStr},,${responsavel_id},${relacao},${dataCadastro},true\n`;
     
     await fs.appendFile(this.CSV_FILE, novaLinha);
     
@@ -147,6 +152,12 @@ class Usuario {
     return usuarios.filter(u => u.ativo);
   }
 
+  // Buscar dependentes de um responsável
+  static async findDependentes(responsavelId) {
+    const usuarios = await this.readAll();
+    return usuarios.filter(u => u.responsavel_id === responsavelId && u.ativo);
+  }
+
   // Atualizar interesses
   static async atualizarInteresses(id, interesses) {
     const usuarios = await this.readAll();
@@ -174,7 +185,7 @@ class Usuario {
   // Salvar todos
   static async saveAll(usuarios) {
     const lines = usuarios.map(u => 
-      `${u.id},${u.tipo},${u.ra || ''},${u.nome},${u.telefone || ''},${u.email || ''},${u.sexo || ''},${u.data_nascimento || ''},${u.idade || 0},${u.curso || ''},${u.qr_code},${u.interesses.join('|')},${u.tipo_aluno || ''},${u.data_cadastro},${u.ativo}`
+      `${u.id},${u.tipo},${u.ra || ''},${u.nome},${u.telefone || ''},${u.email || ''},${u.sexo || ''},${u.data_nascimento || ''},${u.idade || 0},${u.curso || ''},${u.qr_code},${u.interesses.join('|')},${u.tipo_aluno || ''},${u.responsavel_id || ''},${u.relacao || ''},${u.data_cadastro},${u.ativo}`
     ).join('\n');
     
     await fs.writeFile(this.CSV_FILE, this.CSV_HEADERS + lines + '\n');
