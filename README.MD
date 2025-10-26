@@ -495,8 +495,11 @@ flowchart TD
 *Documento criado em: 26/10/2025*
 *Versão: 1.0*
 
-sim sou aluno falta interno/externo
-no nao sou aluno tirar a senha pois o padrao sera duas primeiras letras do nome + 4 ultimos digitos do telefone
+"sim sou aluno" falta opções de interno/externo
+no "nao sou aluno" tirar a senha pois o padrao sera duas primeiras letras do nome + 4 ultimos digitos do telefone
 ao criar sala, trocar nomes por id do usuario(qr code)
 painel adm deve ter a opção inserir id OU tambem usuario(pedir quantos usuarios)
 painel de adm senior remover dashboard de dados e adicionar gestão de monitores
+o ID unico dos usuarios é o RA, enquanto o dos visitantes é o seguinte formato: 2 primeiras letras do nome + 4 ultimos numeros do telefone, exemplo: MA4567
+esses ids unicos são usados pra gerar o qr code
+o painel de adm deve ser capaz de ler qr code dos usuarios quando criar uma mesa de jogadores
