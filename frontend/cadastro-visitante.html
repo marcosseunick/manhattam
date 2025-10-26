@@ -62,8 +62,8 @@
 
         label { display: block; margin-bottom: 6px; font-weight: 600; color: #444; }
 
-  input, select { width: 100%; padding: 12px 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; transition: border-color 0.2s, box-shadow 0.2s; }
-        input:focus, select:focus { border-color: #4f46e5; outline: none; }
+  input { width: 100%; padding: 12px 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus { border-color: #4f46e5; outline: none; }
   /* primary buttons */
   button, .btn { background: #003366; color: white; border: none; padding: 14px 18px; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; transition: background 0.18s, transform 0.06s; width: 100%; max-width: 320px; margin: 0 auto; display: inline-block; }
   button:hover, .btn:hover { background: #2b4aa0; transform: translateY(-1px); }
@@ -90,8 +90,6 @@
     <main>
       <section aria-label="Formulário de cadastro de visitante">
         <form id="form-visitante">
-          <h3 style="text-align: left; margin-bottom: 20px; font-size: 18px;">Seus Dados</h3>
-          
           <div>
             <label for="nome">Nome Completo</label>
             <input id="nome" name="nome" type="text" required />
@@ -103,23 +101,9 @@
             <small>Sua senha será gerada automaticamente</small>
           </div>
 
-          <div style="margin-top: 30px; border-top: 2px solid #e5e7eb; padding-top: 20px;">
-            <h3 style="text-align: left; margin-bottom: 20px; font-size: 18px;">
-              Cadastrar Dependentes (Opcional)
-            </h3>
-            
-            <div id="dependentes-lista">
-              <!-- Dependentes adicionados aparecerão aqui -->
+            <div>
+              <button type="submit">Cadastrar</button>
             </div>
-            
-            <button type="button" id="btn-adicionar-dependente" style="background: #4CAF50; margin-top: 10px;">
-              + Adicionar Dependente
-            </button>
-          </div>
-
-          <div style="margin-top: 20px;">
-            <button type="submit">Cadastrar</button>
-          </div>
         </form>
         <p><a href="cadastro.html">Voltar</a></p>
         <div id="mensagem"></div>
@@ -131,56 +115,6 @@
     </footer>
 
     <script>
-      let dependentes = [];
-      let contadorDependentes = 0;
-
-      // Adicionar campo de dependente
-      document.getElementById('btn-adicionar-dependente').addEventListener('click', () => {
-        contadorDependentes++;
-        const dependentId = `dependente-${contadorDependentes}`;
-        
-        const dependentDiv = document.createElement('div');
-        dependentDiv.id = dependentId;
-        dependentDiv.style.marginBottom = '15px';
-        dependentDiv.style.padding = '15px';
-        dependentDiv.style.border = '2px solid #e5e7eb';
-        dependentDiv.style.borderRadius = '10px';
-        dependentDiv.style.backgroundColor = '#f9fafb';
-        
-        dependentDiv.innerHTML = `
-          <label for="nome-dependente-${contadorDependentes}">Nome do Dependente</label>
-          <input id="nome-dependente-${contadorDependentes}" type="text" required placeholder="Nome completo" style="margin-bottom: 10px;" />
-          
-          <label for="telefone-dependente-${contadorDependentes}">Telefone</label>
-          <input id="telefone-dependente-${contadorDependentes}" type="tel" required placeholder="11987654321" style="margin-bottom: 10px;" />
-          
-          <label for="relacao-dependente-${contadorDependentes}">Relação</label>
-          <select id="relacao-dependente-${contadorDependentes}" required style="margin-bottom: 10px;">
-            <option value="">Selecione...</option>
-            <option value="filho">Filho(a)</option>
-            <option value="filha">Filha</option>
-            <option value="filho">Filho</option>
-            <option value="parente">Outro Parente</option>
-          </select>
-          
-          <button type="button" onclick="removerDependente('${dependentId}')" style="background: #f44336; padding: 8px 16px; font-size: 14px; margin-top: 5px;">
-            ✕ Remover
-          </button>
-        `;
-        
-        document.getElementById('dependentes-lista').appendChild(dependentDiv);
-      });
-
-      // Remover dependente
-      function removerDependente(id) {
-        const element = document.getElementById(id);
-        if (element) {
-          element.remove();
-          // Atualizar lista
-          dependentes = dependentes.filter(d => d.id !== id);
-        }
-      }
-
       document.getElementById('form-visitante').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -188,56 +122,23 @@
         const telefone = document.getElementById('telefone').value;
         const mensagemDiv = document.getElementById('mensagem');
         
-        // Coletar dependentes
-        const dependentesList = [];
-        for (let i = 1; i <= contadorDependentes; i++) {
-          const nomeInput = document.getElementById(`nome-dependente-${i}`);
-          const telefoneInput = document.getElementById(`telefone-dependente-${i}`);
-          const relacaoInput = document.getElementById(`relacao-dependente-${i}`);
-          
-          if (nomeInput && telefoneInput && relacaoInput && nomeInput.parentElement) {
-            const nomeValue = nomeInput.value;
-            const telefoneValue = telefoneInput.value;
-            const relacaoValue = relacaoInput.value;
-            
-            if (nomeValue && telefoneValue && relacaoValue) {
-              dependentesList.push({
-                nome: nomeValue,
-                telefone: telefoneValue,
-                relacao: relacaoValue
-              });
-            }
-          }
-        }
-        
         try {
-          // Cadastrar o visitante principal
           const response = await fetch('http://localhost:3000/api/usuario/cadastro/visitante', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nome, telefone, tipo: 'visitante', dependentes: dependentesList }),
+            body: JSON.stringify({ nome, telefone, tipo: 'visitante' }),
           });
           
           const data = await response.json();
           
           if (response.ok) {
-            let mensagem = `<p style="color: green;">${data.message}<br>Sua senha: <strong>${data.usuario.senha}</strong><br>Guarde esta senha!</p>`;
-            
-            if (data.dependentes && data.dependentes.length > 0) {
-              mensagem += `<br><strong>Dependentes cadastrados:</strong><br>`;
-              data.dependentes.forEach(d => {
-                mensagem += `${d.nome} - Senha: ${d.senha}<br>`;
-              });
-            }
-            
-            mensagemDiv.innerHTML = mensagem;
-            
+            mensagemDiv.innerHTML = `<p style="color: green;">${data.message}<br>Sua senha: <strong>${data.usuario.senha}</strong><br>Guarde esta senha!</p>`;
             // Redirecionar após sucesso
             setTimeout(() => {
               window.location.href = 'cadastro.html';
-            }, 3000);
+            }, 2000);
           } else {
             mensagemDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
           }
