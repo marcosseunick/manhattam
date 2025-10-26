@@ -111,6 +111,94 @@ Sistema de carteirinha digital onde o usuário se cadastra uma vez e recebe um I
 
 ---
 
+## 🔄 Fluxograma do Sistema
+
+### Fluxo Completo: Do Cadastro à Sessão de Jogo
+
+```mermaid
+flowchart TD
+    Start([Usuário chega na SavePoint]) --> FirstTime{Primeira<br/>visita?}
+    
+    FirstTime -->|Sim| Cadastro[Acessa página de cadastro<br/>HTML/CSS/JavaScript]
+    FirstTime -->|Não| HasQR[Usuário apresenta<br/>QR Code ao monitor]
+    
+    Cadastro --> TypeUser{Tipo de<br/>usuário?}
+    
+    TypeUser -->|Aluno| InputRA[Digita RA]
+    TypeUser -->|Visitante/Comunidade| InputData[Preenche:<br/>Nome, Telefone/Email, Tipo]
+    
+    InputRA --> SearchTOTVS[Sistema busca dados<br/>automaticamente no TOTVS]
+    SearchTOTVS --> SelectInterests[Seleciona interesses:<br/>cartas, tabuleiro, etc.]
+    
+    InputData --> GenerateID[Sistema gera ID único]
+    
+    SelectInterests --> GenerateQR[Sistema gera QR Code<br/>personalizado]
+    GenerateID --> GenerateQR
+    
+    GenerateQR --> SendQR[QR Code enviado por<br/>Email/SMS + exibido na tela]
+    SendQR --> SaveQR[Usuário salva QR Code<br/>screenshot/email]
+    
+    SaveQR --> HasQR
+    
+    HasQR --> MonitorScan[Monitor escaneia QR Code<br/>no tablet em modo quiosque]
+    MonitorScan --> SystemCheck{QR Code<br/>válido?}
+    
+    SystemCheck -->|Não| Error[Erro: QR inválido<br/>ou usuário não encontrado]
+    SystemCheck -->|Sim| RegisterEntry[Sistema registra entrada:<br/>- Timestamp<br/>- Identificação do usuário<br/>- Início da sessão]
+    
+    Error --> Retry{Tentar<br/>novamente?}
+    Retry -->|Sim| HasQR
+    Retry -->|Não| Cadastro
+    
+    RegisterEntry --> Feedback[Feedback visual/sonoro:<br/>✓ Bem-vindo, Nome!<br/>🎮 Esta é sua Xª visita!]
+    
+    Feedback --> PlayGames[Usuário utiliza a ludoteca<br/>e joga]
+    
+    PlayGames --> End([Sessão registrada no sistema])
+    
+    style Start fill:#e1f5e1
+    style End fill:#e1f5e1
+    style Cadastro fill:#fff4e1
+    style GenerateQR fill:#e1f0ff
+    style MonitorScan fill:#ffe1f0
+    style RegisterEntry fill:#f0e1ff
+    style Feedback fill:#90EE90
+    style Error fill:#ffcccc
+```
+
+### Tempos Estimados por Fluxo
+
+| Cenário | Tempo Estimado |
+|---------|----------------|
+| **Aluno - Primeira Visita** | 20-30 segundos |
+| **Visitante - Primeira Visita** | 30-40 segundos |
+| **Visitas Seguintes (com QR Code)** | 2-3 segundos |
+| **Grupo/Turma (20 alunos)** | 10-15 segundos |
+
+### Descrição das Etapas
+
+1. **🆕 Cadastro Inicial**
+   - Usuário preenche dados mínimos na página web
+   - Sistema valida e busca informações complementares (TOTVS para alunos)
+   - Gera QR Code único e personalizado
+
+2. **📱 Recebimento da Carteirinha Digital**
+   - QR Code enviado por email/SMS
+   - Usuário pode salvar no celular ou imprimir
+   - Válido para todas as visitas futuras
+
+3. **✅ Check-in Rápido**
+   - Monitor escaneia QR Code no tablet
+   - Sistema identifica usuário instantaneamente
+   - Registra entrada com timestamp automático
+
+4. **🎮 Sessão de Jogo**
+   - Entrada registrada no banco de dados
+   - Disponível para relatórios e análises
+   - Histórico do usuário atualizado
+
+---
+
 ## 🎯 Problemas a Resolver
 
 ### 1. Atrito no Primeiro Cadastro
