@@ -6,14 +6,14 @@
   <title>Termos de Uso — Bem-vindo</title>
   <style>
     :root{
-      --bg:#f4f6fb;
+      --bg:#003366;
       --card:#ffffff;
       --accent:#2b6cb0;
       --muted:#6b7280;
       --shadow: 0 8px 30px rgba(15,23,42,0.08);
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      font-family: "DINPro";
     }
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 100%);color:#0f172a}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#003366 0%,var(--bg) 100%);color:#0f172a}
     .wrap{
       min-height:100vh;
       display:flex;
@@ -41,11 +41,24 @@
       flex-direction:column;
       gap:12px;
     }
-    .brand .logo{
-      width:68px;height:68px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);
-      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;
+    .brand .logo {
+    width: 160px;
+    height: 130px;
+    border-radius: 12px;
+    overflow: hidden; /* faz a imagem seguir o formato arredondado */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none; /* remove o fundo roxo */
     }
-    h1{margin:0;font-size:20px}
+
+    .logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ajusta a imagem sem distorcer */
+    }
+
+    h1{margin:0;font-size:30px}
     p.lead{margin:0;color:var(--muted)}
     .actions{
       flex:1 1 360px;
@@ -130,8 +143,8 @@
   <div class="wrap">
     <div class="card" role="main" aria-labelledby="title">
       <div class="brand" aria-hidden="false">
-        <div class="logo" aria-hidden="true">LOGO</div>
-        <h1 id="title">Bem-vindo ao Projeto</h1>
+        <div class="logo" aria-hidden="true"><a href="https://ibb.co/4nLQZSSC"><img src="https://i.ibb.co/Q3V5FHHh/LOGO.png" alt="LOGO" border="0"></a></div>
+        <h1 id="title">Bem-vindo ao SavePoint</h1>
         <p class="lead">Antes de continuar, leia e aceite nossos Termos de Uso e Política de Privacidade.</p>
       </div>
 
