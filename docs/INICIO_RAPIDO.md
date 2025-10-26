@@ -15,28 +15,32 @@ npm install
 npm start
 ```
 
-Pronto! Acesse: **http://localhost:3000/cadastro.html**
+Pronto! Acesse: **http://localhost:3000/frontend/lgpd.html**
 
 ---
 
 ## 📱 Testando o Sistema
 
 ### Cadastro de Aluno
-1. Acesse http://localhost:3000/cadastro.html
-2. Clique em **"Sim, sou Aluno"**
-3. Digite qualquer RA (ex: 12345)
-4. Clique em **"Validar e Continuar"**
+1. Acesse http://localhost:3000/frontend/lgpd.html
+2. Aceite os termos e condições
+3. Clique em "Aceitar e Continuar"
+4. Clique em **"Sim, sou Aluno"**
+5. Digite qualquer RA (ex: 12345)
+6. Clique em **"Validar e Continuar"**
 
 ✅ O aluno será salvo em `backend/data/alunos.csv`
 
 ### Cadastro de Visitante
-1. Acesse http://localhost:3000/cadastro.html
-2. Clique em **"Não, sou Visitante"**
-3. Preencha o formulário:
+1. Acesse http://localhost:3000/frontend/lgpd.html
+2. Aceite os termos e condições
+3. Clique em "Aceitar e Continuar"
+4. Clique em **"Não, sou Visitante"**
+5. Preencha o formulário:
    - Nome: Seu nome completo
    - Telefone: (11) 98765-4321
    - Senha: mínimo 6 caracteres
-4. Clique em **"Cadastrar"**
+6. Clique em **"Cadastrar"**
 
 ✅ O visitante será salvo em `backend/data/visitantes.csv`
 
@@ -100,6 +104,7 @@ manhattam/
 │   └── server.js        # Arquivo principal
 │
 └── frontend/            # Páginas HTML
+    ├── lgpd.html               # Aceitar termos (página inicial)
     ├── cadastro.html           # Escolha: Aluno ou Visitante
     ├── cadastro-aluno.html     # Form aluno
     └── cadastro-visitante.html # Form visitante

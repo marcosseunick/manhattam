@@ -199,9 +199,15 @@
           
           if (response.ok) {
             mensagemDiv.innerHTML = `<p style="color: green;">${data.message}<br>Cadastro realizado com sucesso!</p>`;
+            
+            // Salvar dados do usuário no localStorage
+            if (data.usuario) {
+              localStorage.setItem('usuarioLogado', JSON.stringify(data.usuario));
+            }
+            
             // Redirecionar após sucesso
             setTimeout(() => {
-              window.location.href = 'cadastro.html';
+              window.location.href = 'painel_usuario.html';
             }, 2000);
           } else {
             mensagemDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;

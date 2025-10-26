@@ -137,14 +137,42 @@
         const lista = document.getElementById('minhas-salas');
         const API_BASE = 'http://localhost:3000/api';
         
-        // Simular usuário logado
-        const usuarioLogado = {
-          id: '1',
-          tipo: 'aluno',
-          nome: 'João Silva'
-        };
+        // Recuperar dados do usuário logado do localStorage
+        const usuarioLogadoData = localStorage.getItem('usuarioLogado');
+        let usuarioLogado;
+        
+        if (usuarioLogadoData) {
+          try {
+            usuarioLogado = JSON.parse(usuarioLogadoData);
+          } catch (e) {
+            console.error('Erro ao parsear dados do usuário:', e);
+            usuarioLogado = {
+              id: '1',
+              tipo: 'aluno',
+              nome: 'Usuário'
+            };
+          }
+        } else {
+          // Se não houver dados salvos, usar valores padrão
+          usuarioLogado = {
+            id: '1',
+            tipo: 'aluno',
+            nome: 'Usuário'
+          };
+        }
         
         document.querySelector('h1').textContent = `Olá, ${usuarioLogado.nome}`;
+
+        // Funcionalidade do botão "Sair"
+        const linkSair = document.querySelector('nav a');
+        linkSair.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (confirm('Tem certeza que deseja sair?')) {
+            localStorage.removeItem('usuarioLogado');
+            alert('Até logo!');
+            window.location.href = 'lgpd.html';
+          }
+        });
 
         async function carregarSalas(){
           try {

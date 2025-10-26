@@ -133,17 +133,12 @@
       const accepts = localStorage.getItem(KEY);
       const continueBtn = document.getElementById('continueBtn');
       const checkbox = document.getElementById('acceptCheckbox');
-      const openTerms = document.getElementById('openTerms');
-      const modalBackdrop = document.getElementById('modalBackdrop');
-      const closeModal = document.getElementById('closeModal');
-      const modalClose = document.getElementById('modalClose');
-      const modalAccept = document.getElementById('modalAccept');
       const declineBtn = document.getElementById('declineBtn');
 
-      // Se já aceitou antes -> redireciona (editar destino conforme necessário)
+      // Se já aceitou antes -> redireciona
       if (accepts === 'true') {
-        // Redireciona direto para a página principal do site
-        window.location.href = '/home.html'; // <--- ajuste para seu caminho real
+        // Redireciona para a página de cadastro
+        window.location.href = 'cadastro.html';
       }
 
       // Habilitar botão apenas se checkbox marcado
@@ -151,54 +146,17 @@
         continueBtn.disabled = !checkbox.checked;
       });
 
-      // Abrir modal de termos
-      function showModal() {
-        modalBackdrop.style.display = 'flex';
-        modalBackdrop.setAttribute('aria-hidden','false');
-        // foco no topo do modal para leitores de tela
-        document.querySelector('.modal').focus();
-        // prevenir scroll do body
-        document.body.style.overflow = 'hidden';
-      }
-      function hideModal() {
-        modalBackdrop.style.display = 'none';
-        modalBackdrop.setAttribute('aria-hidden','true');
-        document.body.style.overflow = '';
-      }
-
-      openTerms.addEventListener('click', showModal);
-      closeModal.addEventListener('click', hideModal);
-      modalClose.addEventListener('click', hideModal);
-
-      // Aceitar via modal
-      modalAccept.addEventListener('click', () => {
-        checkbox.checked = true;
-        continueBtn.disabled = false;
-        hideModal();
-      });
-
-      // Fechar modal com Esc
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modalBackdrop.style.display === 'flex') hideModal();
-      });
-
       // Aceitar e continuar: salvar e redirecionar
       continueBtn.addEventListener('click', () => {
         if (!checkbox.checked) return;
         localStorage.setItem(KEY, 'true');
-        // Redirecionamento após aceitar (altere para o destino correto)
-        window.location.href = '/home.html';
+        // Redirecionamento após aceitar
+        window.location.href = 'cadastro.html';
       });
 
       // Recusar: opcional - aqui mostra alerta e não permite continuar
       declineBtn.addEventListener('click', () => {
         alert('Você recusou os termos. Algumas funcionalidades podem ficar indisponíveis.');
-      });
-
-      // Acessibilidade: abrir modal ao focar e pressionar Enter na prévia
-      const termsPreview = document.getElementById('termsPreview');
-      termsPreview.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') showModal();
       });
 
       // Evita envio por Enter acidental quando checkbox está focado

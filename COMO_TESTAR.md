@@ -11,25 +11,29 @@ npm start
 
 ### 2️⃣ Testar Sistema de Cadastro
 
-**Acesse:** `http://localhost:3000/cadastro.html`
+**Acesse:** `http://localhost:3000/frontend/lgpd.html`
 
 #### Cadastrar Aluno:
-1. Clique em "Sim, sou Aluno"
-2. Digite um RA (ex: 12345)
-3. Clique em "Validar e Continuar"
+1. Aceite os termos e condições
+2. Clique em "Aceitar e Continuar"
+3. Clique em "Sim, sou Aluno"
+4. Digite um RA (ex: 12345)
+5. Clique em "Validar e Continuar"
 ✅ Salvo em: `backend/data/alunos.csv`
 
 #### Cadastrar Visitante:
-1. Clique em "Não, sou Visitante"
-2. Preencha nome, telefone e senha
-3. Clique em "Cadastrar"
+1. Aceite os termos e condições
+2. Clique em "Aceitar e Continuar"
+3. Clique em "Não, sou Visitante"
+4. Preencha nome, telefone e senha
+5. Clique em "Cadastrar"
 ✅ Salvo em: `backend/data/visitantes.csv`
 
 ---
 
 ### 3️⃣ Testar Painel de Usuário
 
-**Acesse:** `http://localhost:3000/painel_usuario.html`
+**Acesse:** `http://localhost:3000/frontend/painel_usuario.html`
 
 #### Criar Sala:
 1. Clique em "Criar Nova Sala de Jogo"

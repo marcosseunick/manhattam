@@ -135,9 +135,18 @@
           
           if (response.ok) {
             mensagemDiv.innerHTML = `<p style="color: green;">${data.message}<br>Sua senha: <strong>${data.usuario.senha}</strong><br>Guarde esta senha!</p>`;
+            
+            // Salvar dados do usuário no localStorage
+            if (data.usuario) {
+              // Remover a senha antes de salvar no localStorage por segurança
+              const usuarioLogado = { ...data.usuario };
+              delete usuarioLogado.senha;
+              localStorage.setItem('usuarioLogado', JSON.stringify(usuarioLogado));
+            }
+            
             // Redirecionar após sucesso
             setTimeout(() => {
-              window.location.href = 'cadastro.html';
+              window.location.href = 'painel_usuario.html';
             }, 2000);
           } else {
             mensagemDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;

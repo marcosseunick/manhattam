@@ -142,7 +142,7 @@
         <div>
           <label for="id-sala">Inserir ID da Sala</label>
           <input id="id-sala" name="id-sala" type="text" />
-          <button type="button">Adicionar</button>
+          <button type="button" id="adicionar-btn">Adicionar</button>
         </div>
       </article>
     </section>
@@ -227,6 +227,12 @@
                 const li = document.createElement('li');
                 li.textContent = text;
                 scannedList.appendChild(li);
+                
+                // Preenche automaticamente o campo de ID da sala
+                const idSalaInput = document.getElementById('id-sala');
+                if (idSalaInput) {
+                  idSalaInput.value = text;
+                }
               }
             }
           } catch (e) {
@@ -242,6 +248,34 @@
 
       // Expor funções úteis ao console para teste manual
       window._qrScanner = { start: startScanner, stop: stopScanner, scanned };
+    })();
+
+    // Handler para o botão "Adicionar"
+    (function () {
+      const adicionarBtn = document.getElementById('adicionar-btn');
+      const idSalaInput = document.getElementById('id-sala');
+
+      if (adicionarBtn) {
+        adicionarBtn.addEventListener('click', function () {
+          const idSala = idSalaInput.value.trim();
+          
+          if (!idSala) {
+            alert('Por favor, insira o ID da sala ou escaneie o QR code.');
+            return;
+          }
+
+          // Desabilita o botão para evitar múltiplos cliques
+          adicionarBtn.disabled = true;
+          adicionarBtn.textContent = 'Processando...';
+
+          // Simula processamento e reseta a página após 1.5 segundos
+          setTimeout(() => {
+            alert('Sala adicionada com sucesso!');
+            // Reseta a página atual
+            window.location.reload();
+          }, 1500);
+        });
+      }
     })();
   </script>
 
