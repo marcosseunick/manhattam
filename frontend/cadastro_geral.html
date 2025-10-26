@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro e Verificação</title>
+    <!-- Carrega o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fonte Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo para a aba ativa */
+        .tab-active {
+            border-bottom-color: #003366; /* blue-500 */
+            color: #003366;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-blue-900 flex items-center justify-center min-h-screen px-4 py-8 sm:py-12">
+
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-6 sm:p-8 transition-all">
+        
+        <!-- Seção de Cadastro (Inicialmente visível) -->
+        <div id="register-section">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Criar Conta</h2>
+            <p class="text-center text-gray-500 mb-6">Selecione seu tipo de cadastro.</p>
+
+            <!-- Abas de Navegação -->
+            <div class="flex border-b mb-6">
+                <button id="tab-visitante" class="tab-btn flex-1 py-3 text-center text-black border-b-2 border-transparent transition-all" onclick="showForm('visitante')">
+                    Comunidade/Visitas
+                </button>
+                <button id="tab-vinculo" class="tab-btn flex-1 py-3 text-center text-black border-b-2 border-transparent transition-all" onclick="showForm('vinculo')">
+                    Aluno
+                </button>
+            </div>
+
+            <!-- Formulário de Comunidade/Visitas (Default) -->
+            <form id="form-visitante" class="space-y-4" onsubmit="handleRegister(event, 'visitante')">
+                <input type="hidden" name="user_type" value="visitante">
+                <div>
+                    <label for="nome-visitante" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                    <input type="text" id="nome-visitante" name="nome" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div>
+                    <label for="telefone" class="block text-sm font-medium text-gray-700 mb-1">Telefone (somente números)</label>
+                    <input type="tel" id="telefone" name="telefone" placeholder="11912345678" minlength="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required inputmode="numeric" pattern="\d+" title="Digite apenas números, incluindo o DDD.">
+                </div>
+                <button type="submit" id="btn-register-visitante" class="w-full bg-orange-500 text-white py-3 px-4 rounded-lg font-semibold hover:bg-orange-700 transition-all shadow-md">
+                    Continuar
+                </button>
+            </form>
+
+            <!-- Formulário de Aluno (Oculto) -->
+            <form id="form-vinculo" class="hidden space-y-4" onsubmit="handleRegister(event, 'vinculo')">
+                <input type="hidden" name="user_type" value="vinculo">
+                <div>
+                    <label for="ra" class="block text-sm font-medium text-gray-700 mb-1">RA (exatos 6 números)</label>
+                    <input type="text" id="ra" name="ra" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required inputmode="numeric" pattern="\d{6}" maxlength="6" title="O RA deve conter exatamente 6 números.">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Vínculo</label>
+                    <select id="tipo-vinculo" name="tipo_vinculo" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="" disabled selected>Selecione uma opção</option>
+                        <option value="aluno_interno">Aluno Interno</option>
+                        <option value="aluno_externo">Aluno Externo</option>
+                    </select>
+                </div>
+                <button type="submit" id="btn-register-vinculo" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-md">
+                    Continuar
+                </button>
+            </form>
+        </div>
+
+        <!-- Seção de Verificação (Oculta) -->
+        <div id="verify-section" class="hidden">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Verificar Acesso</h2>
+            <p id="verify-message" class="text-center text-gray-500 mb-6 leading-relaxed">...</p>
+            
+            <form id="form-verify" class="space-y-4" onsubmit="handleVerify(event)">
+                <div>
+                    <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Código de Confirmação</label>
+                    <input type="text" id="code" name="code" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-center text-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <button type="submit" id="btn-verify" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition-all shadow-md">
+                    Verificar e Cadastrar
+                </button>
+            </form>
+        </div>
+
+        <!-- Seção do QR Code foi removida -->
+
+        <!-- Mensagens de Feedback (Sucesso/Erro) -->
+        <div id="message-box" class="hidden mt-4 p-4 rounded-lg text-center"></div>
+    </div>
+
+    <script>
+        // --- URL do Webhook do Make.com ---
+        // Agora só precisamos de UMA URL
+        const WEBHOOK_URL_SUBMIT = 'https://hook.us2.make.com/fd4evwamjetthuaxqhhs3pbxvsdc3elw';
+
+        const formVinculo = document.getElementById('form-vinculo');
+        const formVisitante = document.getElementById('form-visitante');
+        const tabVinculo = document.getElementById('tab-vinculo');
+        const tabVisitante = document.getElementById('tab-visitante');
+        
+        const registerSection = document.getElementById('register-section');
+        const verifySection = document.getElementById('verify-section');
+        const verifyMessage = document.getElementById('verify-message');
+        const codeInput = document.getElementById('code');
+        
+        // Elementos do QR Code removidos
+        
+        const messageBox = document.getElementById('message-box');
+
+        // Guarda os dados do primeiro passo
+        let registrationData = null; 
+
+        // Alterna entre os formulários de Aluno e Comunidade/Visitas
+        function showForm(formType) {
+            if (formType === 'vinculo') {
+                formVinculo.classList.remove('hidden');
+                formVisitante.classList.add('hidden');
+                tabVinculo.classList.add('tab-active');
+                tabVisitante.classList.remove('tab-active');
+            } else {
+                formVisitante.classList.remove('hidden');
+                formVinculo.classList.add('hidden');
+                tabVisitante.classList.add('tab-active');
+                tabVinculo.classList.remove('tab-active');
+            }
+        }
+        // Define o formulário 'visitante' (Comunidade/Visitas) como padrão ao carregar
+        showForm('visitante');
+
+        // Passo 1: Guarda os dados e mostra a tela de verificação
+        function handleRegister(event, userType) {
+            event.preventDefault();
+            const form = (userType === 'vinculo') ? formVinculo : formVisitante;
+            // Limpa o campo de código caso esteja voltando
+            codeInput.value = ''; 
+            
+            // Salva os dados do formulário
+            registrationData = Object.fromEntries(new FormData(form).entries());
+
+            // Atualiza a mensagem de verificação
+            if (userType === 'vinculo') {
+                verifyMessage.innerHTML = 'Para confirmar, por favor, insira seu <strong>RA</strong> novamente no campo abaixo.';
+            } else {
+                verifyMessage.innerHTML = 'Para confirmar, insira seu código de acesso: as <strong>2 primeiras letras MAIÚSCULAS do seu nome</strong> + os <strong>4 últimos dígitos do seu celular</strong>. (Ex: <strong>MA1234</strong>)';
+            }
+
+            // Alterna as telas
+            registerSection.classList.add('hidden');
+            verifySection.classList.remove('hidden');
+            codeInput.focus();
+            hideMessage();
+        }
+
+        // Passo 2: Verifica o código localmente e envia ao Make.com
+        async function handleVerify(event) {
+            event.preventDefault();
+            const button = document.getElementById('btn-verify');
+            const code = codeInput.value;
+
+            if (!registrationData || !code) {
+                showMessage('Erro inesperado. Por favor, volte ao início.', 'error');
+                return;
+            }
+
+            // --- Validação Local ---
+            let isValid = false;
+            const userType = registrationData.user_type;
+            
+            if (userType === 'vinculo') {
+                const ra = registrationData.ra || '';
+                isValid = (code === ra);
+            } else if (userType === 'visitante') {
+                const nome = registrationData.nome || '';
+                const telefone = registrationData.telefone || '';
+                
+                if (nome.length < 2 || telefone.length < 4) {
+                     showMessage('Nome ou telefone inválidos. Volte e preencha novamente.', 'error');
+                     return;
+                }
+                // Validação com letras maiúsculas
+                const expectedCode = nome.substring(0, 2).toUpperCase() + telefone.slice(-4);
+                // Comparação case-sensitive
+                isValid = (code === expectedCode);
+            }
+            // --- Fim da Validação ---
+
+            if (!isValid) {
+                showMessage('Código de acesso inválido. Verifique os dados e tente novamente.', 'error');
+                return;
+            }
+
+            // Se for válido, cria o ID customizado, adiciona o timestamp e envia para o Make.com
+            const customID = code; // O código de verificação é o nosso ID customizado
+            registrationData.customID = customID;
+            registrationData.timestamp = new Date().toISOString();
+            
+            button.disabled = true;
+            button.textContent = 'Enviando...';
+            hideMessage();
+
+            try {
+                const response = await fetch(WEBHOOK_URL_SUBMIT, {
+                    method: 'POST',
+                    body: JSON.stringify(registrationData),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    let errorMsg = 'Falha ao enviar o cadastro.';
+                    try {
+                        const result = await response.json();
+                        if (result.message) errorMsg = result.message;
+                    } catch (e) { /* Sem corpo JSON, usa a msg padrão */ }
+                    throw new Error(errorMsg);
+                }
+
+                // Sucesso Total!
+                // Redireciona para o painel do usuário com o ID
+                
+                const registeredID = registrationData.customID;
+                
+                // Limpa os formulários antes de redirecionar
+                formVinculo.reset();
+                formVisitante.reset();
+                codeInput.value = '';
+                registrationData = null; 
+                
+                // Redireciona para a nova página, passando o ID como parâmetro
+                window.location.href = `painel_usuario.html?id=${encodeURIComponent(registeredID)}`;
+
+            } catch (error) {
+                console.error('Erro no envio:', error);
+                showMessage(`Erro: ${error.message}`, 'error');
+                button.disabled = false;
+                button.textContent = 'Verificar e Cadastrar';
+            }
+        }
+
+        // Funções utilitárias para mostrar/ocultar mensagens
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden');
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+                messageBox.classList.remove('bg-green-100', 'text-green-700');
+            } else {
+                messageBox.classList.add('bg-green-100', 'text-green-700');
+                messageBox.classList.remove('bg-red-100', 'text-red-700');
+            }
+        }
+
+        function hideMessage() {
+            messageBox.classList.add('hidden');
+        }
+
+        // Nova função 'resetForm' foi removida pois não é mais necessária
+
+    </script>
+</body>
+</html>
+
