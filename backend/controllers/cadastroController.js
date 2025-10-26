@@ -14,6 +14,13 @@ class CadastroController {
         });
       }
 
+      // Validar formato do RA (6 dígitos)
+      if (!/^\d{6}$/.test(ra.trim())) {
+        return res.status(400).json({
+          error: 'RA deve conter exatamente 6 dígitos'
+        });
+      }
+
       // Verificar se o RA já existe
       const alunoExistente = await Aluno.exists(ra);
       if (alunoExistente) {

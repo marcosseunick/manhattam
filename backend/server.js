@@ -12,7 +12,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Servir arquivos estáticos do frontend
-app.use(express.static('../frontend'));
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Rotas
 const cadastroRoutes = require('./routes/cadastro');
@@ -20,6 +21,18 @@ app.use('/api/cadastro', cadastroRoutes);
 
 const salaRoutes = require('./routes/sala');
 app.use('/api/sala', salaRoutes);
+
+const usuarioRoutes = require('./routes/usuario');
+app.use('/api/usuario', usuarioRoutes);
+
+const entradaRoutes = require('./routes/entrada');
+app.use('/api/entrada', entradaRoutes);
+
+const relatorioRoutes = require('./routes/relatorio');
+app.use('/api/relatorio', relatorioRoutes);
+
+const monitorRoutes = require('./routes/monitor');
+app.use('/api/monitor', monitorRoutes);
 
 // Rota de teste
 app.get('/api/health', (req, res) => {

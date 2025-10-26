@@ -3,76 +3,186 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Painel ADM Sênior — Dashboard</title>
+  <title>Painel ADM Sênior — Gestão de Monitores</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #4CAF50; color: white; }
+    tr:hover { background-color: #f5f5f5; }
+    button { padding: 6px 12px; margin: 2px; cursor: pointer; }
+    .btn-promover { background-color: #2196F3; color: white; border: none; }
+    .btn-rebaixar { background-color: #ff9800; color: white; border: none; }
+    .btn-desativar { background-color: #f44336; color: white; border: none; }
+    .btn-adicionar { background-color: #4CAF50; color: white; border: none; padding: 10px 20px; margin: 20px 0; }
+  </style>
 </head>
 <body>
   <header>
     <h1>Painel de Gestão — Savepoint Ludoteca</h1>
   </header>
 
-  <div class="layout">
-    <nav aria-label="Menu lateral">
-      <ul>
-        <li><a href="#dashboard-dados">Dashboard de Dados</a></li>
-        <li><a href="#gestao-utilizadores">Gestão de Utilizadores</a></li>
-      </ul>
-    </nav>
+  <main>
+    <section aria-labelledby="gestao-monitores">
+      <h2 id="gestao-monitores">Gestão de Monitores</h2>
 
-    <main>
-      <section id="dashboard-dados" aria-labelledby="dashboard-title">
-        <h2 id="dashboard-title">Dashboard de Dados</h2>
+      <button class="btn-adicionar" id="btn-novo-monitor">+ Adicionar Novo Monitor</button>
 
-        <div class="cards">
-          <div class="card" aria-labelledby="card-visitantes">
-            <h3 id="card-visitantes">Total de Visitantes Únicos</h3>
-            <p>[placeholder]</p>
-          </div>
-
-          <div class="card" aria-labelledby="card-tempo">
-            <h3 id="card-tempo">Tempo Médio de Permanência</h3>
-            <p>[placeholder]</p>
-          </div>
-
-          <div class="card" aria-labelledby="card-perfil">
-            <h3 id="card-perfil">Análise de Perfil (Sexo, Idade, Curso)</h3>
-            <p>[placeholder]</p>
-          </div>
-
-          <div class="card" aria-labelledby="card-frequencia">
-            <h3 id="card-frequencia">Frequência (por dia, por semana)</h3>
-            <p>[placeholder]</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="gestao-utilizadores" aria-labelledby="gestao-title">
-        <h2 id="gestao-title">Gestão de Utilizadores</h2>
-
-        <table border="1" summary="Tabela de utilizadores">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Tipo (Usuário/ADM)</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Linhas de utilizadores irão aqui -->
-            <tr>
-              <td>Exemplo</td>
-              <td>exemplo@savepoint.local</td>
-              <td>Usuário</td>
-              <td><button type="button">Promover a ADM</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-    </main>
-  </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Nível</th>
+            <th>Data Cadastro</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-monitores">
+          <!-- Monitores aparecerão aqui -->
+        </tbody>
+      </table>
+    </section>
+  </main>
 
   <footer>
     <small>© Savepoint Ludoteca</small>
   </footer>
+
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+
+    async function carregarMonitores() {
+      try {
+        const response = await fetch(`${API_BASE}/monitor`);
+        const data = await response.json();
+        renderMonitores(data.monitores || []);
+      } catch (error) {
+        console.error('Erro ao carregar monitores:', error);
+        document.getElementById('tabela-monitores').innerHTML = 
+          '<tr><td colspan="6" style="color: red;">Erro ao carregar monitores</td></tr>';
+      }
+    }
+
+    function renderMonitores(monitores) {
+      const tbody = document.getElementById('tabela-monitores');
+      tbody.innerHTML = '';
+
+      if (monitores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6">Nenhum monitor cadastrado</td></tr>';
+        return;
+      }
+
+      monitores.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m.id}</td>
+          <td>${m.nome}</td>
+          <td>${m.email}</td>
+          <td>${m.nivel === 'admin_senior' ? '⭐ Admin Sênior' : '👤 Admin'}</td>
+          <td>${new Date(m.data_cadastro).toLocaleDateString('pt-BR')}</td>
+          <td>
+            ${m.nivel === 'admin' ? 
+              `<button class="btn-promover" onclick="promover(${m.id})">Promover a Sênior</button>` :
+              `<button class="btn-rebaixar" onclick="rebaixar(${m.id})">Rebaixar a Admin</button>`
+            }
+            <button class="btn-desativar" onclick="desativar(${m.id})">Desativar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Adicionar novo monitor
+    document.getElementById('btn-novo-monitor').addEventListener('click', async () => {
+      const nome = prompt('Nome do monitor:');
+      if (!nome) return;
+      
+      const email = prompt('Email do monitor:');
+      if (!email) return;
+      
+      const senha = prompt('Senha:');
+      if (!senha) return;
+      
+      const nivel = confirm('É Admin Sênior?') ? 'admin_senior' : 'admin';
+      
+      try {
+        const response = await fetch(`${API_BASE}/monitor`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, email, senha, nivel })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert('Monitor cadastrado com sucesso!');
+          carregarMonitores();
+        } else {
+          alert('Erro: ' + data.error);
+        }
+      } catch (error) {
+        alert('Erro ao cadastrar monitor');
+      }
+    });
+
+    async function promover(id) {
+      if (!confirm('Promover este monitor a Admin Sênior?')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/monitor/${id}/nivel`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nivel: 'admin_senior' })
+        });
+        
+        if (response.ok) {
+          alert('Monitor promovido!');
+          carregarMonitores();
+        }
+      } catch (error) {
+        alert('Erro ao promover');
+      }
+    }
+
+    async function rebaixar(id) {
+      if (!confirm('Rebaixar este monitor a Admin?')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/monitor/${id}/nivel`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nivel: 'admin' })
+        });
+        
+        if (response.ok) {
+          alert('Monitor rebaixado!');
+          carregarMonitores();
+        }
+      } catch (error) {
+        alert('Erro ao rebaixar');
+      }
+    }
+
+    async function desativar(id) {
+      if (!confirm('Desativar este monitor?')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE}/monitor/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          alert('Monitor desativado!');
+          carregarMonitores();
+        }
+      } catch (error) {
+        alert('Erro ao desativar');
+      }
+    }
+
+    // Carregar monitores ao iniciar
+    carregarMonitores();
+  </script>
 </body>
 </html>

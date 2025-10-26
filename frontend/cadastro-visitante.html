@@ -20,12 +20,8 @@
 
           <div>
             <label for="telefone">Telefone</label>
-            <input id="telefone" name="telefone" type="tel" inputmode="tel" />
-          </div>
-
-          <div>
-            <label for="senha-visitante">Criar Senha</label>
-            <input id="senha-visitante" name="senha" type="password" required />
+            <input id="telefone" name="telefone" type="tel" inputmode="tel" required placeholder="Ex: 11987654321" />
+            <small>Sua senha será gerada automaticamente</small>
           </div>
 
           <div>
@@ -47,25 +43,24 @@
         
         const nome = document.getElementById('nome').value;
         const telefone = document.getElementById('telefone').value;
-        const senha = document.getElementById('senha-visitante').value;
         const mensagemDiv = document.getElementById('mensagem');
         
         try {
-          const response = await fetch('http://localhost:3000/api/cadastro/visitante', {
+          const response = await fetch('http://localhost:3000/api/usuario/cadastro/visitante', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nome, telefone, senha }),
+            body: JSON.stringify({ nome, telefone, tipo: 'visitante' }),
           });
           
           const data = await response.json();
           
           if (response.ok) {
-            mensagemDiv.innerHTML = `<p style="color: green;">${data.message}</p>`;
+            mensagemDiv.innerHTML = `<p style="color: green;">${data.message}<br>Sua senha: <strong>${data.usuario.senha}</strong><br>Guarde esta senha!</p>`;
             // Redirecionar após sucesso
             setTimeout(() => {
-              window.location.href = 'login.html';
+              window.location.href = 'cadastro.html';
             }, 2000);
           } else {
             mensagemDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;

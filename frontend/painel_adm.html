@@ -15,25 +15,39 @@
 
   <main>
     <section aria-label="Ferramentas do monitor">
+      <h2>Adicionar Jogadores à Mesa</h2>
+      
+      <!-- Opção 1: Inserir ID ou QR Code direto -->
       <article>
-        <button type="button">Iniciar sessão na mesa</button>
+        <h3>Opção 1: Inserir ID ou QR Code</h3>
+        <div>
+          <label for="qr-code-input">QR Code ou ID do Usuário</label>
+          <input id="qr-code-input" type="text" placeholder="Ex: ALU-412345-A3F8K2" />
+          <button type="button" id="btn-adicionar-qr">Adicionar</button>
+        </div>
       </article>
 
-      <!-- Botão 'Escanear Carteirinha' removido conforme solicitado -->
-
+      <!-- Opção 2: Buscar usuário -->
       <article>
+        <h3>Opção 2: Buscar Usuário</h3>
         <div>
-          <label for="id-sala">Inserir ID da Sala</label>
-          <input id="id-sala" name="id-sala" type="text" />
-          <button type="button">Adicionar</button>
+          <label for="buscar-nome">Nome do usuário</label>
+          <input id="buscar-nome" type="text" placeholder="Digite o nome..." />
+          <button type="button" id="btn-buscar">Buscar</button>
         </div>
+        <div id="resultados-busca"></div>
+      </article>
+
+      <!-- Iniciar Sessão -->
+      <article>
+        <button type="button" id="btn-iniciar-sessao">Iniciar Sessão de Jogo</button>
       </article>
     </section>
 
     <section aria-labelledby="sessao-atual">
-      <h2 id="sessao-atual">Sessão Atual</h2>
-      <ul id="jogadores-na-mesa">
-        <!-- Lista de jogadores na mesa aparecerá aqui -->
+      <h2 id="sessao-atual">Jogadores na Mesa</h2>
+      <ul id="jogadores-na-mesa" style="list-style: none; padding: 0;">
+        <!-- Lista de jogadores aparecerá aqui -->
       </ul>
     </section>
   </main>
@@ -41,5 +55,159 @@
   <footer>
     <small>© Savepoint Ludoteca</small>
   </footer>
+
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+    const jogadoresNaMesa = [];
+    
+    // Adicionar por QR Code
+    document.getElementById('btn-adicionar-qr').addEventListener('click', async () => {
+      const qrCode = document.getElementById('qr-code-input').value.trim();
+      
+      if (!qrCode) {
+        alert('Digite um QR Code ou ID');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE}/usuario/qrcode/${qrCode}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          adicionarJogadorNaMesa(data.usuario);
+          document.getElementById('qr-code-input').value = '';
+        } else {
+          alert('Erro: ' + data.error);
+        }
+      } catch (error) {
+        alert('Erro ao buscar usuário');
+      }
+    });
+    
+    // Buscar usuários
+    document.getElementById('btn-buscar').addEventListener('click', async () => {
+      const nome = document.getElementById('buscar-nome').value.trim();
+      
+      if (!nome) {
+        alert('Digite um nome para buscar');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE}/usuario`);
+        const data = await response.json();
+        
+        const usuarios = data.usuarios.filter(u => 
+          u.nome.toLowerCase().includes(nome.toLowerCase())
+        );
+        
+        mostrarResultadosBusca(usuarios);
+      } catch (error) {
+        alert('Erro ao buscar usuários');
+      }
+    });
+    
+    function mostrarResultadosBusca(usuarios) {
+      const div = document.getElementById('resultados-busca');
+      div.innerHTML = '';
+      
+      if (usuarios.length === 0) {
+        div.innerHTML = '<p>Nenhum usuário encontrado</p>';
+        return;
+      }
+      
+      usuarios.forEach(u => {
+        const item = document.createElement('div');
+        item.style.padding = '10px';
+        item.style.border = '1px solid #ddd';
+        item.style.marginTop = '5px';
+        item.innerHTML = `
+          <strong>${u.nome}</strong> (${u.tipo})<br>
+          QR: ${u.qr_code}<br>
+          <button onclick="adicionarJogadorNaMesa({qr_code: '${u.qr_code}', nome: '${u.nome}', tipo: '${u.tipo}'})">
+            Adicionar à Mesa
+          </button>
+        `;
+        div.appendChild(item);
+      });
+    }
+    
+    function adicionarJogadorNaMesa(usuario) {
+      if (jogadoresNaMesa.find(j => j.qr_code === usuario.qr_code)) {
+        alert('Jogador já está na mesa!');
+        return;
+      }
+      
+      jogadoresNaMesa.push(usuario);
+      renderJogadores();
+    }
+    
+    function renderJogadores() {
+      const lista = document.getElementById('jogadores-na-mesa');
+      lista.innerHTML = '';
+      
+      if (jogadoresNaMesa.length === 0) {
+        lista.innerHTML = '<li>Nenhum jogador adicionado</li>';
+        return;
+      }
+      
+      jogadoresNaMesa.forEach((jogador, index) => {
+        const li = document.createElement('li');
+        li.style.padding = '10px';
+        li.style.border = '1px solid #ddd';
+        li.style.marginBottom = '5px';
+        li.innerHTML = `
+          ${index + 1}. <strong>${jogador.nome}</strong> (${jogador.tipo})<br>
+          QR: ${jogador.qr_code}<br>
+          <button onclick="removerJogador(${index})">Remover</button>
+        `;
+        lista.appendChild(li);
+      });
+    }
+    
+    function removerJogador(index) {
+      jogadoresNaMesa.splice(index, 1);
+      renderJogadores();
+    }
+    
+    // Iniciar sessão
+    document.getElementById('btn-iniciar-sessao').addEventListener('click', async () => {
+      if (jogadoresNaMesa.length === 0) {
+        alert('Adicione pelo menos um jogador');
+        return;
+      }
+      
+      const jogo = prompt('Digite o nome do jogo:');
+      if (!jogo) return;
+      
+      const qrCodes = jogadoresNaMesa.map(j => j.qr_code);
+      
+      try {
+        const response = await fetch(`${API_BASE}/sala/criar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            criador_qr_code: qrCodes[0],
+            jogo: jogo,
+            jogadores_qr_codes: qrCodes
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert(`Sala criada com sucesso!\nID: ${data.sala.id}\nJogadores: ${jogadoresNaMesa.length}`);
+          jogadoresNaMesa.length = 0;
+          renderJogadores();
+        } else {
+          alert('Erro: ' + data.error);
+        }
+      } catch (error) {
+        alert('Erro ao criar sala');
+      }
+    });
+    
+    renderJogadores();
+  </script>
 </body>
 </html>

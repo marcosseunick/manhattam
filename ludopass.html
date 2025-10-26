@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LUDOPASS - unasp </title>
+<style>
+  :root {
+    --azul-unasp: #003366;
+    --branco: #ffffff;
+    --cinza: #f5f6fa;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body {
+    background: var(--cinza);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .carteirinha {
+    width: 360px;
+    height: 210px;
+    background: linear-gradient(135deg, var(--azul-unasp), #0066cc, #0052a3);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: var(--branco);
+    position: relative;
+  }
+
+  /* Topo com logos */
+  .topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .topo img {
+    height: 40px;
+    object-fit: contain;
+  }
+
+  /* Conteúdo principal */
+  .conteudo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .dados {
+    flex: 1;
+  }
+
+  .dados h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .dados p {
+    margin: 5px 0;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  /* QR Code */
+  .qrcode {
+    width: 100px;
+    height: 100px;
+    background: var(--branco);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+  }
+
+  .qrcode img {
+    width: 95px;
+    height: 95px;
+  }
+
+  /* Rodapé */
+  .rodape {
+    border-top: 1px solid rgba(255,255,255,0.3);
+    margin-top: 8px;
+    padding-top: 6px;
+    text-align: center;
+    font-size: 12px;
+    opacity: 0.9;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="carteirinha">
+  <!-- Topo -->
+  <div class="topo">
+    <a href="https://ibb.co/v6vcHJCS"><img src="https://i.ibb.co/5gx165XP/unasp-bolsas-logo.webp" alt="unasp-bolsas-logo" border="0"></a>
+    <a href="https://ibb.co/4nLQZSSC"><img src="https://i.ibb.co/Q3V5FHHh/LOGO.png" alt="LOGO" border="0"></a>
+  </div>
+
+  <!-- Conteúdo -->
+  <div class="conteudo">
+    <div class="dados">
+      <h2>Lucas Dziaduk</h2>
+      <p>SAVE ID: 20251026</p>
+      <p>Usuário — Ludoteca UNASP</p>
+    </div>
+
+    <div class="qrcode">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=95x95&data=20251026" alt="QR Code">
+    </div>
+  </div>
+
+  <!-- Rodapé -->
+  <div class="rodape">
+    LUDOPASS — Uso Interno UNASP
+  </div>
+</div>
+
+</body>
+</html>

@@ -3,7 +3,7 @@ const path = require('path');
 
 class Sala {
   static CSV_FILE = path.join(__dirname, '../data/salas.csv');
-  static CSV_HEADERS = 'id,criador_id,criador_tipo,criador_nome,nome,jogo,jogadores,status,data_criacao,data_inicio,data_fim\n';
+  static CSV_HEADERS = 'id,criador_qr_code,nome,jogo,jogadores_qr_codes,status,data_criacao,data_inicio,data_fim\n';
 
   // Inicializar arquivo CSV
   static async initializeCSV() {
@@ -25,15 +25,13 @@ class Sala {
     return lines
       .filter(line => line.trim())
       .map(line => {
-        const [id, criador_id, criador_tipo, criador_nome, nome, jogo, jogadores, status, data_criacao, data_inicio, data_fim] = line.split(',');
+        const [id, criador_qr_code, nome, jogo, jogadores_qr_codes, status, data_criacao, data_inicio, data_fim] = line.split(',');
         return { 
           id,
-          criador_id,
-          criador_tipo,
-          criador_nome,
+          criador_qr_code,
           nome,
           jogo,
-          jogadores: jogadores ? jogadores.split('|').filter(j => j.trim()) : [],
+          jogadores_qr_codes: jogadores_qr_codes ? jogadores_qr_codes.split('|').filter(j => j.trim()) : [],
           status,
           data_criacao,
           data_inicio,
@@ -50,15 +48,15 @@ class Sala {
   // Criar nova sala
   static async create(salaData) {
     await this.initializeCSV();
-    const { criador_id, criador_tipo, criador_nome, nome, jogo, jogadores } = salaData;
+    const { criador_qr_code, nome, jogo, jogadores_qr_codes } = salaData;
     
     const novoId = this.gerarIdSala();
     const dataCriacao = new Date().toISOString();
     
-    // Jogadores deve ser um array de nomes
-    const jogadoresStr = Array.isArray(jogadores) ? jogadores.join('|') : '';
+    // Jogadores deve ser um array de QR Codes
+    const jogadoresStr = Array.isArray(jogadores_qr_codes) ? jogadores_qr_codes.join('|') : '';
     
-    const novaLinha = `${novoId},${criador_id},${criador_tipo},${criador_nome || ''},${nome || ''},${jogo || ''},${jogadoresStr},aguardando,${dataCriacao},,\n`;
+    const novaLinha = `${novoId},${criador_qr_code},${nome || ''},${jogo || ''},${jogadoresStr},aguardando,${dataCriacao},,\n`;
     
     await fs.appendFile(this.CSV_FILE, novaLinha);
     return novoId;
@@ -70,10 +68,10 @@ class Sala {
     return salas.find(s => s.id === id);
   }
 
-  // Buscar salas do usuário
-  static async findByUser(userId, userType) {
+  // Buscar salas do usuário (por QR Code)
+  static async findByUser(qrCode) {
     const salas = await this.readAll();
-    return salas.filter(s => s.criador_id === userId && s.criador_tipo === userType);
+    return salas.filter(s => s.criador_qr_code === qrCode);
   }
 
   // Buscar salas disponíveis (aguardando jogadores)
@@ -82,8 +80,8 @@ class Sala {
     return salas.filter(s => s.status === 'aguardando');
   }
 
-  // Adicionar jogador à sala
-  static async adicionarJogador(salaId, nomeJogador) {
+  // Adicionar jogador à sala (por QR Code)
+  static async adicionarJogador(salaId, qrCodeJogador) {
     const salas = await this.readAll();
     const index = salas.findIndex(s => s.id === salaId);
     
@@ -96,19 +94,19 @@ class Sala {
     }
     
     // Verificar se o jogador já está na sala
-    if (sala.jogadores.includes(nomeJogador)) {
+    if (sala.jogadores_qr_codes.includes(qrCodeJogador)) {
       return { success: false, message: 'Jogador já está nesta sala' };
     }
     
     // Adicionar jogador
-    salas[index].jogadores.push(nomeJogador);
+    salas[index].jogadores_qr_codes.push(qrCodeJogador);
     
     await this.saveAll(salas);
     return { success: true, sala: salas[index] };
   }
 
-  // Remover jogador da sala
-  static async removerJogador(salaId, nomeJogador) {
+  // Remover jogador da sala (por QR Code)
+  static async removerJogador(salaId, qrCodeJogador) {
     const salas = await this.readAll();
     const index = salas.findIndex(s => s.id === salaId);
     
@@ -117,7 +115,7 @@ class Sala {
     const sala = salas[index];
     
     // Remover jogador
-    salas[index].jogadores = sala.jogadores.filter(j => j !== nomeJogador);
+    salas[index].jogadores_qr_codes = sala.jogadores_qr_codes.filter(j => j !== qrCodeJogador);
     
     await this.saveAll(salas);
     return { success: true, sala: salas[index] };
@@ -157,8 +155,8 @@ class Sala {
   // Salvar todas as salas
   static async saveAll(salas) {
     const lines = salas.map(s => {
-      const jogadoresStr = s.jogadores.join('|');
-      return `${s.id},${s.criador_id},${s.criador_tipo},${s.criador_nome},${s.nome},${s.jogo},${jogadoresStr},${s.status},${s.data_criacao},${s.data_inicio || ''},${s.data_fim || ''}`;
+      const jogadoresStr = s.jogadores_qr_codes.join('|');
+      return `${s.id},${s.criador_qr_code},${s.nome},${s.jogo},${jogadoresStr},${s.status},${s.data_criacao},${s.data_inicio || ''},${s.data_fim || ''}`;
     }).join('\n');
     
     await fs.writeFile(this.CSV_FILE, this.CSV_HEADERS + lines + '\n');

@@ -14,8 +14,20 @@
       <section aria-label="Formulário de cadastro de aluno">
         <form id="form-aluno">
           <div>
-            <label for="ra">RA (Registro Acadêmico)</label>
-            <input id="ra" name="ra" type="text" required />
+            <label for="ra">RA (Registro Acadêmico - 6 dígitos)</label>
+            <input id="ra" name="ra" type="text" required pattern="\d{6}" maxlength="6" placeholder="Ex: 412345" />
+            <small>Digite exatamente 6 dígitos numéricos</small>
+          </div>
+
+          <div>
+            <label>Você é aluno:</label>
+            <div>
+              <input type="radio" id="interno" name="tipo_aluno" value="interno" required />
+              <label for="interno">Interno</label>
+              
+              <input type="radio" id="externo" name="tipo_aluno" value="externo" required />
+              <label for="externo">Externo</label>
+            </div>
           </div>
 
           <div>
@@ -36,24 +48,25 @@
         e.preventDefault();
         
         const ra = document.getElementById('ra').value;
+        const tipoAluno = document.querySelector('input[name="tipo_aluno"]:checked').value;
         const mensagemDiv = document.getElementById('mensagem');
         
         try {
-          const response = await fetch('http://localhost:3000/api/cadastro/aluno', {
+          const response = await fetch('http://localhost:3000/api/usuario/cadastro/aluno', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ ra }),
+            body: JSON.stringify({ ra, tipo_aluno: tipoAluno }),
           });
           
           const data = await response.json();
           
           if (response.ok) {
-            mensagemDiv.innerHTML = `<p style="color: green;">${data.message}</p>`;
+            mensagemDiv.innerHTML = `<p style="color: green;">${data.message}<br>Cadastro realizado com sucesso!</p>`;
             // Redirecionar após sucesso
             setTimeout(() => {
-              window.location.href = 'login.html';
+              window.location.href = 'cadastro.html';
             }, 2000);
           } else {
             mensagemDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
