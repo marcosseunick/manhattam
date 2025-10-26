@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Savepoint Ludoteca — Cadastro de Aluno</title>
+  </head>
+  <body>
+    <header>
+      <h1>Cadastro de Aluno</h1>
+    </header>
+
+    <main>
+      <section aria-label="Formulário de cadastro de aluno">
+        <form id="form-aluno">
+          <div>
+            <label for="ra">RA (Registro Acadêmico)</label>
+            <input id="ra" name="ra" type="text" required />
+          </div>
+
+          <div>
+            <button type="submit">Validar e Continuar</button>
+          </div>
+        </form>
+        <p><a href="cadastro.html">Voltar</a></p>
+        <div id="mensagem"></div>
+      </section>
+    </main>
+
+    <footer>
+      <small>© Savepoint Ludoteca</small>
+    </footer>
+
+    <script>
+      document.getElementById('form-aluno').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const ra = document.getElementById('ra').value;
+        const mensagemDiv = document.getElementById('mensagem');
+        
+        try {
+          const response = await fetch('http://localhost:3000/api/cadastro/aluno', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ra }),
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            mensagemDiv.innerHTML = `<p style="color: green;">${data.message}</p>`;
+            // Redirecionar após sucesso
+            setTimeout(() => {
+              window.location.href = 'login.html';
+            }, 2000);
+          } else {
+            mensagemDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+          }
+        } catch (error) {
+          mensagemDiv.innerHTML = `<p style="color: red;">Erro ao conectar com o servidor.</p>`;
+          console.error('Erro:', error);
+        }
+      });
+    </script>
+  </body>
+</html>
+
