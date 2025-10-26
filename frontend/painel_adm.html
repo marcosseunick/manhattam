@@ -73,9 +73,11 @@
 
       input:focus { border-color: #4f46e5; outline: none; }
 
+      /* Default: lower buttons use transparent background with blue border */
       button {
-        border: #2563eb;
-        color: white;
+        background: transparent;
+        color: #003366;
+        border: 2px solid #003366;
         padding: 10px 16px;
         border-radius: 8px;
         font-size: 15px;
@@ -84,10 +86,19 @@
         transition: all 0.2s;
       }
 
-      button:hover { 
-        background: #1d4ed8;
+      button:hover {
+        background: #003366;
+        color: white;
         transform: translateY(-1px);
       }
+
+      /* Primary top button remains filled */
+      #start-session-btn {
+        background: #003366;
+        color: white;
+        border: none;
+      }
+      #start-session-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
 
       p { margin-top: 16px; }
 
