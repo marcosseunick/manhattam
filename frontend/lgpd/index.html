@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Termos de Uso — Bem-vindo</title>
+    <style>
+      /* Reset e fontes */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #003366, #4f46e5);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #333;
+        padding: 16px;
+      }
+
+      header, main, footer {
+        width: 100%;
+        max-width: 360px;
+      }
+
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 24px;
+      }
+
+      header h1 {
+        font-size: 24px;
+        letter-spacing: 0.5px;
+      }
+
+      main {
+        background: white;
+        padding: 24px;
+        border-radius: 14px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        width: 100%;
+      }
+
+      .wrap{
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:28px;
+      }
+      .card{
+        max-width:920px;
+        width:100%;
+        background:#ffffff;
+        border-radius:14px;
+        box-shadow:0 8px 30px rgba(15,23,42,0.08);
+        padding:28px;
+        display:flex;
+        gap:28px;
+        align-items:center;
+        flex-wrap:wrap;
+      }
+
+      .brand{ flex:1 1 260px; min-width:220px; display:flex; flex-direction:column; gap:12px; }
+      .logo{ width:160px; height:130px; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+      .logo img{ width:100%; height:100%; object-fit:cover; }
+
+      h1{margin:0;font-size:30px}
+      p.lead{margin:0;color:#6b7280}
+      .actions{ flex:1 1 360px; min-width:260px; display:flex; flex-direction:column; gap:16px; }
+      .terms-preview{ border:1px solid #e6e9ef; border-radius:8px; padding:14px; background:#fbfdff; max-height:178px; overflow:auto; color:#111827; }
+      label.checkbox{ display:flex; gap:12px; align-items:center; cursor:pointer; user-select:none; }
+      input[type="checkbox"]{ width:18px; height:18px; border-radius:4px; border:1px solid #cbd5e1; accent-color:#2b6cb0; }
+      .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border:0; padding:12px 16px; border-radius:10px; font-weight:600; cursor:pointer; }
+      .btn.primary{ background:#2b6cb0; color:#fff; box-shadow:0 6px 20px rgba(43,108,176,0.18); }
+      .btn.ghost{ background:transparent; color:#2b6cb0; border:1px solid #dbeafe; }
+      .btn[disabled]{ opacity:0.55; cursor:not-allowed; }
+
+      @media (max-width:740px){ .card{padding:18px} .brand{order:2;width:100%} .actions{order:1;width:100%} }
+    </style>
+  </head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main" aria-labelledby="title">
+      <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true"><a href="https://ibb.co/4nLQZSSC"><img src="https://i.ibb.co/Q3V5FHHh/LOGO.png" alt="LOGO" border="0"></a></div>
+        <h1 id="title">Bem-vindo ao SavePoint</h1>
+        <p class="lead">Antes de continuar, leia e aceite nossos Termos de Uso e Política de Privacidade.</p>
+      </div>
+
+      <div class="actions" aria-live="polite">
+        <div class="terms-preview" id="termsPreview" tabindex="0" aria-label="Resumo dos termos">
+          <strong>Resumo:</strong>
+          <p>
+            Esses termos descrevem os direitos e obrigações ao usar este site. Ao aceitar, você concorda com o processamento de seus dados conforme a nossa política de privacidade, bem como com as regras de conduta e uso do serviço.
+          </p>
+          <p style="margin-top:8px"><em>Leia o documento completo para mais detalhes.</em></p>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <label class="checkbox" for="acceptCheckbox">
+            <input id="acceptCheckbox" type="checkbox" aria-describedby="checkboxHelp" />
+            <span>Li e aceito os <a href="http://unasp.br/lgpd" target="_blank" rel="noopener noreferrer"><button id="openTerms" class="btn ghost" type="button">Termos e Política</button></span></a> 
+          </label>
+          <small id="checkboxHelp" style="color:var(--muted)">Você precisa aceitar para continuar</small>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button id="continueBtn" class="btn primary" disabled>Aceitar e Continuar</button>
+          <button id="declineBtn" class="btn ghost">Recusar</button>
+        </div>
+
+        <div style="font-size:13px;color:var(--muted)">
+          <strong>Privacidade:</strong> os dados mínimos necessários serão armazenados para permitir sua experiência no site.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <script>
+    (function(){
+      const KEY = 'termsAccepted_v1';
+      const accepts = localStorage.getItem(KEY);
+      const continueBtn = document.getElementById('continueBtn');
+      const checkbox = document.getElementById('acceptCheckbox');
+      const openTerms = document.getElementById('openTerms');
+      const modalBackdrop = document.getElementById('modalBackdrop');
+      const closeModal = document.getElementById('closeModal');
+      const modalClose = document.getElementById('modalClose');
+      const modalAccept = document.getElementById('modalAccept');
+      const declineBtn = document.getElementById('declineBtn');
+
+      // Se já aceitou antes -> redireciona (editar destino conforme necessário)
+      if (accepts === 'true') {
+        // Redireciona direto para a página principal do site
+        window.location.href = '/home.html'; // <--- ajuste para seu caminho real
+      }
+
+      // Habilitar botão apenas se checkbox marcado
+      checkbox.addEventListener('change', () => {
+        continueBtn.disabled = !checkbox.checked;
+      });
+
+      // Abrir modal de termos
+      function showModal() {
+        modalBackdrop.style.display = 'flex';
+        modalBackdrop.setAttribute('aria-hidden','false');
+        // foco no topo do modal para leitores de tela
+        document.querySelector('.modal').focus();
+        // prevenir scroll do body
+        document.body.style.overflow = 'hidden';
+      }
+      function hideModal() {
+        modalBackdrop.style.display = 'none';
+        modalBackdrop.setAttribute('aria-hidden','true');
+        document.body.style.overflow = '';
+      }
+
+      openTerms.addEventListener('click', showModal);
+      closeModal.addEventListener('click', hideModal);
+      modalClose.addEventListener('click', hideModal);
+
+      // Aceitar via modal
+      modalAccept.addEventListener('click', () => {
+        checkbox.checked = true;
+        continueBtn.disabled = false;
+        hideModal();
+      });
+
+      // Fechar modal com Esc
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modalBackdrop.style.display === 'flex') hideModal();
+      });
+
+      // Aceitar e continuar: salvar e redirecionar
+      continueBtn.addEventListener('click', () => {
+        if (!checkbox.checked) return;
+        localStorage.setItem(KEY, 'true');
+        // Redirecionamento após aceitar (altere para o destino correto)
+        window.location.href = '/home.html';
+      });
+
+      // Recusar: opcional - aqui mostra alerta e não permite continuar
+      declineBtn.addEventListener('click', () => {
+        alert('Você recusou os termos. Algumas funcionalidades podem ficar indisponíveis.');
+      });
+
+      // Acessibilidade: abrir modal ao focar e pressionar Enter na prévia
+      const termsPreview = document.getElementById('termsPreview');
+      termsPreview.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') showModal();
+      });
+
+      // Evita envio por Enter acidental quando checkbox está focado
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && document.activeElement === checkbox) e.preventDefault();
+      });
+    })();
+  </script>
+</body>
+</html>
