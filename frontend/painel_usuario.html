@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel — Usuário</title>
+</head>
+<body>
+  <header>
+    <h1>Olá, [Nome]</h1>
+    <nav>
+      <a href="#" title="Sair">Sair</a>
+    </nav>
+  </header>
+
+  <main>
+    <section aria-labelledby="carteirinha">
+      <h2 id="carteirinha">Carteirinha Digital</h2>
+      <div>
+        <!-- Placeholder para QR Code gerado dinamicamente -->
+        <img id="qr-img" src="placeholder-qr.png" alt="QR Code do usuário (placeholder)" width="200" height="200" />
+      </div>
+    </section>
+
+    <section id="gestao-salas" aria-label="Controlo de salas do usuário">
+      <div>
+        <button type="button" id="btn-criar-sala">Criar Nova Sala de Jogo</button>
+      </div>
+
+      <h3 id="minhas-salas-title">Minhas Salas</h3>
+      <ul id="minhas-salas" aria-labelledby="minhas-salas-title">
+        <!-- Salas criadas aparecerão aqui -->
+      </ul>
+    </section>
+
+    <script>
+      (function(){
+        const btnCriar = document.getElementById('btn-criar-sala');
+        const lista = document.getElementById('minhas-salas');
+        const API_BASE = 'http://localhost:3000/api';
+        
+        // Simular usuário logado
+        const usuarioLogado = {
+          id: '1',
+          tipo: 'aluno',
+          nome: 'João Silva'
+        };
+        
+        document.querySelector('h1').textContent = `Olá, ${usuarioLogado.nome}`;
+
+        async function carregarSalas(){
+          try {
+            const response = await fetch(`${API_BASE}/sala/minhas/${usuarioLogado.tipo}/${usuarioLogado.id}`);
+            const data = await response.json();
+            renderSalas(data.salas || []);
+          } catch (error) {
+            console.error('Erro ao carregar salas:', error);
+            lista.innerHTML = '<li>Erro ao carregar salas</li>';
+          }
+        }
+
+        function renderSalas(salas){
+          lista.innerHTML = '';
+          if(salas.length === 0){
+            const li = document.createElement('li');
+            li.textContent = 'Nenhuma sala criada.';
+            lista.appendChild(li);
+            return;
+          }
+          salas.forEach(sala => {
+            const li = document.createElement('li');
+            li.style.marginBottom = '15px';
+            
+            const jogadoresText = sala.jogadores.join(', ');
+            li.innerHTML = `
+              <strong>Sala ${sala.id}</strong><br>
+              Jogo: ${sala.jogo}<br>
+              Jogadores (${sala.jogadores.length}): ${jogadoresText}<br>
+              Status: ${sala.status}
+            `;
+            
+            // Botão para iniciar sala
+            if (sala.status === 'aguardando') {
+              const btnIniciar = document.createElement('button');
+              btnIniciar.textContent = 'Iniciar Jogo';
+              btnIniciar.style.marginTop = '5px';
+              btnIniciar.onclick = () => iniciarSala(sala.id);
+              li.appendChild(btnIniciar);
+            }
+            
+            lista.appendChild(li);
+          });
+        }
+
+        async function iniciarSala(salaId) {
+          try {
+            const response = await fetch(`${API_BASE}/sala/iniciar/${salaId}`, {
+              method: 'POST'
+            });
+            const data = await response.json();
+            if (response.ok) {
+              alert('Sala iniciada! Bom jogo!');
+              carregarSalas();
+            } else {
+              alert('Erro: ' + data.error);
+            }
+          } catch (error) {
+            console.error('Erro ao iniciar sala:', error);
+            alert('Erro ao iniciar sala');
+          }
+        }
+
+        btnCriar.addEventListener('click', async function(){
+          const nomeJogo = prompt('Nome do jogo:');
+          if (!nomeJogo) return;
+          
+          // Pedir nomes dos jogadores
+          const jogadoresInput = prompt('Digite os nomes dos jogadores separados por vírgula:\n(exemplo: João Silva, Maria Santos, Pedro Costa)');
+          if (!jogadoresInput) return;
+          
+          const jogadores = jogadoresInput.split(',').map(j => j.trim()).filter(j => j);
+          
+          if (jogadores.length === 0) {
+            alert('Você precisa informar pelo menos um jogador');
+            return;
+          }
+          
+          try {
+            const response = await fetch(`${API_BASE}/sala/criar`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                criador_id: usuarioLogado.id,
+                criador_tipo: usuarioLogado.tipo,
+                criador_nome: usuarioLogado.nome,
+                jogo: nomeJogo,
+                jogadores: jogadores
+              })
+            });
+            const data = await response.json();
+            if (response.ok) {
+              alert(`Sala criada: ${data.sala.id}\n\nJogadores:\n${jogadores.join('\n')}`);
+              carregarSalas();
+            } else {
+              alert('Erro: ' + data.error);
+            }
+          } catch (error) {
+            console.error('Erro ao criar sala:', error);
+            alert('Erro ao criar sala');
+          }
+        });
+
+        // Carregar salas ao iniciar
+        carregarSalas();
+        
+        // Auto-refresh a cada 10 segundos
+        setInterval(carregarSalas, 10000);
+      })();
+    </script>
+  </main>
+
+  <footer>
+    <small>© Savepoint Ludoteca</small>
+  </footer>
+</body>
+</html>
